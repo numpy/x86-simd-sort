@@ -11,6 +11,13 @@ bench = include_directories('benchmarks')
 utils = include_directories('utils')
 tests = include_directories('tests')
 
+# check if compiler supports -march=haswell, -march=skylake-avx512 and -march=icelake-client and error out if not
+if cpp.get_id() != 'msvc'
+  if not cpp.has_argument('-march=haswell') or not cpp.has_argument('-march=skylake-avx512') or not cpp.has_argument('-march=icelake-client')
+    error('Compiler does not support -march=haswell, -march=skylake-avx512 or -march=icelake-client. Please use a newer compiler version.')
+  endif
+endif
+
 # Add IPP sort to benchmarks:
 benchipp = false
 ipplink = []
@@ -37,6 +44,7 @@ if get_option('use_openmp')
   omp = dependency('openmp', required : true)
   omp_dep = declare_dependency(dependencies: omp, compile_args: ['-DXSS_USE_OPENMP'])
 endif
+
 
 fp16code = '''#include<immintrin.h>
 int main() {
