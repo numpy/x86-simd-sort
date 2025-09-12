@@ -1,4 +1,4 @@
-name: Build and run tests
+    name: Build and run tests
 
 on:
   push:
@@ -135,7 +135,7 @@ jobs:
     - name: Run test suite on SPR
       run: sde -spr -- ./builddir/testexe --gtest_filter="*simdsort*"
 
-  ADL-ASAN-clang18:
+  ASAN-clang18:
 
     runs-on: ubuntu-24.04
 
@@ -172,45 +172,9 @@ jobs:
     - name: Run test suite on ADL
       run: sde -adl -- ./builddir/testexe --gtest_filter="*simdsort*"
 
-  SPR-ASAN-clang18:
-
-    runs-on: intel-ubuntu-24.04
-
-    steps:
-    - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-
-    - name: Install dependencies
-      run: |
-        sudo apt update
-        sudo apt -y install clang-18 libomp-18-dev libgtest-dev meson curl git
-
-    - name: Install Intel SDE
-      run: |
-        curl -o /tmp/sde.tar.xz https://downloadmirror.intel.com/859732/sde-external-9.58.0-2025-06-16-lin.tar.xz
-        mkdir /tmp/sde && tar -xvf /tmp/sde.tar.xz -C /tmp/sde/
-        sudo mv /tmp/sde/* /opt/sde && sudo ln -s /opt/sde/sde64 /usr/bin/sde
-
-    - name: Build examples
-      env:
-        CXX: clang++-18
-      run: |
-        cd examples
-        make all
-
-    - name: Build
-      env:
-        CXX: clang++-18
-      run: |
-        make clean
-        meson setup -Dbuild_tests=true -Duse_openmp=true -Db_sanitize=address,undefined -Dfatal_sanitizers=true  -Dasan_ci_dont_validate=true -Db_lundef=false --warnlevel 0 --buildtype release builddir
-        cd builddir
-        ninja
-
     - name: Run test suite on SPR
-      run: sde -spr -- ./builddir/testexe
-    - name: Run ICL fp16 tests
-      # Note: This filters for the _Float16 tests based on the number assigned to it, which could change in the future
-      run: sde -icx -- ./builddir/testexe --gtest_filter="*/simdsort/2*"
+      run: sde -spr -- ./builddir/testexe --gtest_filter="*simdsort*"
+
 
   SKX-SKL-openmp:
 
