@@ -1,6 +1,10 @@
 // ICL specific routines:
 #include "x86simdsort-static-incl.h"
 #include "x86simdsort-internal.h"
+#ifdef _MSC_VER
+#include "avx512-16bit-qsort.hpp"
+#endif
+
 
 namespace xss {
 namespace avx512 {
