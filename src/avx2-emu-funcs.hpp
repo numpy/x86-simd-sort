@@ -147,7 +147,7 @@ X86_SIMD_SORT_INLINE
 __m256i convert_int_to_avx2_mask(int32_t m)
 {
     return _mm256_loadu_si256(
-            (const __m256i *)avx2_mask_helper_lut32[m].data());
+            (const __m256i *)avx2_mask_helper_lut32[static_cast<size_t>(m)].data());
 }
 
 X86_SIMD_SORT_INLINE
@@ -160,7 +160,7 @@ X86_SIMD_SORT_INLINE
 __m256i convert_int_to_avx2_mask_64bit(int32_t m)
 {
     return _mm256_loadu_si256(
-            (const __m256i *)avx2_mask_helper_lut64[m].data());
+            (const __m256i *)avx2_mask_helper_lut64[static_cast<size_t>(m)].data());
 }
 
 X86_SIMD_SORT_INLINE
@@ -173,7 +173,7 @@ X86_SIMD_SORT_INLINE
 __m128i convert_int_to_avx2_mask_half(int32_t m)
 {
     return _mm_loadu_si128(
-            (const __m128i *)avx2_mask_helper_lut32_half[m].data());
+            (const __m128i *)avx2_mask_helper_lut32_half[static_cast<size_t>(m)].data());
 }
 
 X86_SIMD_SORT_INLINE

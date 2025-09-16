@@ -588,7 +588,7 @@ X86_SIMD_SORT_INLINE void xss_qsort_kv(
     int maxiters = -1;
     bool minarrsize = true;
 #else
-    int maxiters = 2 * log2(arrsize);
+    int maxiters = static_cast<int>(2 * log2(arrsize));
     bool minarrsize = arrsize > 1 ? true : false;
 #endif // XSS_TEST_KEYVALUE_BASE_CASE
 
@@ -683,7 +683,7 @@ X86_SIMD_SORT_INLINE void xss_select_kv(T1 *keys,
     int maxiters = -1;
     bool minarrsize = true;
 #else
-    int maxiters = 2 * log2(arrsize);
+    int maxiters = static_cast<int>(2 * log2(arrsize));
     bool minarrsize = arrsize > 1 ? true : false;
 #endif // XSS_TEST_KEYVALUE_BASE_CASE
 
