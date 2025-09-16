@@ -9,6 +9,37 @@ on:
 permissions: read-all
 
 jobs:
+  build-windows-msvc:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Set up MSVC environment
+      - name: Set up MSVC Developer Command Prompt
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      # Install Python (Meson requires it)
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      # Install Meson and Ninja
+      - name: Install Meson + Ninja
+        run: |
+          python -m pip install --upgrade pip
+          pip install meson ninja
+
+      # Configure and build with Meson (MSVC will be used automatically)
+      - name: Configure (Meson)
+        run: meson setup --warnlevel 2 --buildtype release builddir --backend=ninja
+
+      - name: Build (Ninja)
+        run: ninja -C builddir
+        
   SKL-gcc9:
 
     runs-on: ubuntu-24.04
