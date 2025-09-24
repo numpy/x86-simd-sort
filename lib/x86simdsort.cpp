@@ -62,7 +62,7 @@ namespace x86simdsort {
 #define DECLARE_INTERNAL_qsort(TYPE) \
     static void (*internal_qsort##TYPE)(TYPE *, size_t, bool, bool) = NULL; \
     template <> \
-    void qsort(TYPE *arr, size_t arrsize, bool hasnan, bool descending) \
+    void XSS_EXPORT_SYMBOL qsort(TYPE *arr, size_t arrsize, bool hasnan, bool descending) \
     { \
         (*internal_qsort##TYPE)(arr, arrsize, hasnan, descending); \
     }
@@ -71,7 +71,7 @@ namespace x86simdsort {
     static void (*internal_qselect##TYPE)(TYPE *, size_t, size_t, bool, bool) \
             = NULL; \
     template <> \
-    void qselect( \
+    void XSS_EXPORT_SYMBOL qselect( \
             TYPE *arr, size_t k, size_t arrsize, bool hasnan, bool descending) \
     { \
         (*internal_qselect##TYPE)(arr, k, arrsize, hasnan, descending); \
@@ -82,7 +82,7 @@ namespace x86simdsort {
             TYPE *, size_t, size_t, bool, bool) \
             = NULL; \
     template <> \
-    void partial_qsort( \
+    void XSS_EXPORT_SYMBOL partial_qsort( \
             TYPE *arr, size_t k, size_t arrsize, bool hasnan, bool descending) \
     { \
         (*internal_partial_qsort##TYPE)(arr, k, arrsize, hasnan, descending); \
@@ -93,8 +93,8 @@ namespace x86simdsort {
             const TYPE *, size_t, bool, bool) \
             = NULL; \
     template <> \
-    std::vector<size_t> argsort( \
-            const TYPE *arr, size_t arrsize, bool hasnan, bool descending) \
+    std::vector<size_t> XSS_EXPORT_SYMBOL argsort( \
+            TYPE *arr, size_t arrsize, bool hasnan, bool descending) \
     { \
         return (*internal_argsort##TYPE)(arr, arrsize, hasnan, descending); \
     }
@@ -104,8 +104,8 @@ namespace x86simdsort {
             const TYPE *, size_t, size_t, bool) \
             = NULL; \
     template <> \
-    std::vector<size_t> argselect( \
-            const TYPE *arr, size_t k, size_t arrsize, bool hasnan) \
+    std::vector<size_t> XSS_EXPORT_SYMBOL argselect( \
+            TYPE *arr, size_t k, size_t arrsize, bool hasnan) \
     { \
         return (*internal_argselect##TYPE)(arr, k, arrsize, hasnan); \
     }
@@ -217,7 +217,7 @@ DISPATCH_ALL(argselect,
             TYPE1 *, TYPE2 *, size_t, size_t, bool, bool) \
             = NULL; \
     template <> \
-    void keyvalue_qsort(TYPE1 *key, \
+    void XSS_EXPORT_SYMBOL keyvalue_qsort(TYPE1 *key, \
                         TYPE2 *val, \
                         size_t arrsize, \
                         bool hasnan, \
@@ -227,7 +227,7 @@ DISPATCH_ALL(argselect,
                 key, val, arrsize, hasnan, descending); \
     } \
     template <> \
-    void keyvalue_select(TYPE1 *key, \
+    void XSS_EXPORT_SYMBOL keyvalue_select(TYPE1 *key, \
                          TYPE2 *val, \
                          size_t k, \
                          size_t arrsize, \
@@ -238,7 +238,7 @@ DISPATCH_ALL(argselect,
                 key, val, k, arrsize, hasnan, descending); \
     } \
     template <> \
-    void keyvalue_partial_sort(TYPE1 *key, \
+    void XSS_EXPORT_SYMBOL keyvalue_partial_sort(TYPE1 *key, \
                                TYPE2 *val, \
                                size_t k, \
                                size_t arrsize, \
