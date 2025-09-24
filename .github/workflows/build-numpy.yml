@@ -14,7 +14,7 @@ jobs:
   np-multiarray-tgl:
 
     if: github.repository == 'intel/x86-simd-sort'
-    runs-on: intel-ubuntu-24.04
+    runs-on: ubuntu-24.04
 
     steps:
     - name: Checkout x86-simd-sort
@@ -80,7 +80,7 @@ jobs:
   np-multiarray-spr:
 
     if: github.repository == 'intel/x86-simd-sort'
-    runs-on: intel-ubuntu-24.04
+    runs-on: ubuntu-24.04
 
     steps:
     - name: Checkout x86-simd-sort
