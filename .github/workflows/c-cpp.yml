@@ -33,12 +33,29 @@ jobs:
           python -m pip install --upgrade pip
           pip install meson ninja
 
+      - name: Setup environment
+        run: |
+          echo "PKG_CONFIG=${{ github.workspace }}/vcpkg/installed/x64-windows/tools/pkgconf/pkgconf.exe" >> $env:GITHUB_ENV
+          echo "PKG_CONFIG_PATH=${{ github.workspace }}/vcpkg/installed/x64-windows/lib/pkgconfig" >> $env:GITHUB_ENV
+          echo "LIB=${{ github.workspace }}/vcpkg/installed/x64-windows/lib;$env:LIB" >> $env:GITHUB_ENV
+          echo "INCLUDE=${{ github.workspace }}/vcpkg/installed/x64-windows/include;$env:INCLUDE" >> $env:GITHUB_ENV
+        shell: pwsh
+
+      - name: Setup vcpkg and install pkg-config and gtest
+        run: |
+          git clone https://github.com/Microsoft/vcpkg.git
+          .\vcpkg\bootstrap-vcpkg.bat
+          .\vcpkg\vcpkg install gtest:x64-windows pkgconf:x64-windows
+
       # Configure and build with Meson (MSVC will be used automatically)
       - name: Configure (Meson)
-        run: meson setup --warnlevel 2 --buildtype release builddir --backend=ninja
+        run: meson setup -Dbuild_tests=true --warnlevel 2 --buildtype release builddir --backend=ninja
 
       - name: Build (Ninja)
         run: ninja -C builddir
+      
+      - name: Run tests 
+        run: .\builddir\testexe --gtest_filter="*qsort*"
         
   SKL-gcc9:
 

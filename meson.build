@@ -93,7 +93,7 @@ x86simdsortcpp_dep = declare_dependency(
 
 # Build test suite if option build_tests set to true
 if get_option('build_tests')
-  gtest_dep = dependency('gtest_main', required : true, static: false)
+  gtest_dep = dependency('gtest', main : true, required : true, static: false)
   subdir('tests')
   testexe = executable('testexe',
                      include_directories : [lib, utils],
