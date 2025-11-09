@@ -55,7 +55,7 @@ jobs:
         run: ninja -C builddir
       
       - name: Run tests 
-        run: .\builddir\testexe --gtest_filter="*qsort*"
+        run: meson test -C builddir --test-args "\-\-gtest_filter=*qsort*" -v 
         
   SKL-gcc9:
 
