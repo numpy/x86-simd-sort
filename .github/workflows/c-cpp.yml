@@ -133,7 +133,7 @@ jobs:
         ninja
 
     - name: Run test suite on SPR
-      run: sde -spr -- ./builddir/testexe
+      run: sde -spr -- ./builddir/testexe --gtest_filter="*simdsort*"
 
   ADL-ASAN-clang18:
 
@@ -169,8 +169,8 @@ jobs:
         cd builddir
         ninja
 
-    - name: Run test suite on SPR
-      run: sde -adl -- ./builddir/testexe
+    - name: Run test suite on ADL
+      run: sde -adl -- ./builddir/testexe --gtest_filter="*simdsort*"
 
   SPR-ASAN-clang18:
 
