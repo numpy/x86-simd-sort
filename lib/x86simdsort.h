@@ -73,11 +73,14 @@ XSS_EXPORT_SYMBOL void keyvalue_partial_sort(T1 *key,
 template <typename T, typename U, typename Func>
 XSS_EXPORT_SYMBOL void object_qsort(T *arr, U arrsize, Func key_func)
 {
-    static_assert(std::is_integral<U>::value, "arrsize must be an integral type");
+    static_assert(std::is_integral<U>::value,
+                  "arrsize must be an integral type");
     static_assert(sizeof(U) == sizeof(int32_t) || sizeof(U) == sizeof(int64_t),
                   "arrsize must be 32 or 64 bits");
-    using return_type_of = typename decltype(std::function{key_func})::result_type;
-    static_assert(sizeof(return_type_of) == sizeof(int32_t) || sizeof(return_type_of) == sizeof(int64_t),
+    using return_type_of =
+            typename decltype(std::function {key_func})::result_type;
+    static_assert(sizeof(return_type_of) == sizeof(int32_t)
+                          || sizeof(return_type_of) == sizeof(int64_t),
                   "key_func return type must be 32 or 64 bits");
     std::vector<return_type_of> keys(arrsize);
     for (U ii = 0; ii < arrsize; ++ii) {
