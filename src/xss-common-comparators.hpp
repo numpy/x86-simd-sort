@@ -40,8 +40,8 @@ struct Comparator {
     using opmask_t = typename vtype::opmask_t;
     using type_t = typename vtype::type_t;
 
-    X86_SIMD_SORT_FINLINE bool STDSortComparator(const type_t &a,
-                                                 const type_t &b)
+    X86_SIMD_SORT_INLINE bool STDSortComparator(const type_t &a,
+                                                const type_t &b)
     {
         if constexpr (descend) { return comparison_func<vtype>(b, a); }
         else {
