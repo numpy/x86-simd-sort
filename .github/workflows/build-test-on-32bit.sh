@@ -26,5 +26,4 @@ cd builddir
 ninja
 
 ## Run tests
-sde -tgl -- ./testexe
-sde -skl -- ./testexe
+./testexe

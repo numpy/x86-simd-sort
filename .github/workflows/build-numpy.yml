@@ -13,8 +13,8 @@ permissions: read-all
 jobs:
   np-multiarray-tgl:
 
-    if: github.repository == 'intel/x86-simd-sort'
-    runs-on: intel-ubuntu-24.04
+    if: github.repository == 'numpy/x86-simd-sort'
+    runs-on: ubuntu-24.04
 
     steps:
     - name: Checkout x86-simd-sort
@@ -43,7 +43,7 @@ jobs:
 
     - uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
       with:
-        python-version: '3.11'
+        python-version: '3.12'
 
     - name: Install Intel SDE
       run: |
@@ -79,8 +79,8 @@ jobs:
 
   np-multiarray-spr:
 
-    if: github.repository == 'intel/x86-simd-sort'
-    runs-on: intel-ubuntu-24.04
+    if: github.repository == 'numpy/x86-simd-sort'
+    runs-on: ubuntu-24.04
 
     steps:
     - name: Checkout x86-simd-sort
@@ -115,7 +115,7 @@ jobs:
 
     - uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
       with:
-        python-version: '3.11'
+        python-version: '3.12'
 
     - name: Install NumPy dependencies
       working-directory: ${{ github.workspace }}/numpy
