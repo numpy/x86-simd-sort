@@ -580,6 +580,8 @@ X86_SIMD_SORT_INLINE void xss_qsort_kv(
                                               && sizeof(T2) == sizeof(int32_t),
                                       half_vector<T2>,
                                       full_vector<T2>>::type;
+    static_assert(is_valid_vector_type_key_value<keytype, valtype>(),
+                  "Invalid type for keyvalue_qsort!");
 
     // Exit early if no work would be done
     if (arrsize <= 1) return;
@@ -675,6 +677,8 @@ X86_SIMD_SORT_INLINE void xss_select_kv(T1 *keys,
                                               && sizeof(T2) == sizeof(int32_t),
                                       half_vector<T2>,
                                       full_vector<T2>>::type;
+    static_assert(is_valid_vector_type_key_value<keytype, valtype>(),
+                  "Invalid type for keyvalue_select!");
 
     // Exit early if no work would be done
     if (arrsize <= 1) return;
@@ -730,6 +734,19 @@ X86_SIMD_SORT_INLINE void xss_partial_sort_kv(T1 *keys,
                                               bool hasnan,
                                               bool descending)
 {
+    using keytype =
+            typename std::conditional<sizeof(T1) != sizeof(T2)
+                                              && sizeof(T1) == sizeof(int32_t),
+                                      half_vector<T1>,
+                                      full_vector<T1>>::type;
+    using valtype =
+            typename std::conditional<sizeof(T1) != sizeof(T2)
+                                              && sizeof(T2) == sizeof(int32_t),
+                                      half_vector<T2>,
+                                      full_vector<T2>>::type;
+    static_assert(is_valid_vector_type_key_value<keytype, valtype>(),
+                  "Invalid type for keyvalue_partial_sort!");
+
     if (k == 0) return;
     xss_select_kv<T1, T2, full_vector, half_vector>(
             keys, indexes, k - 1, arrsize, hasnan, descending);

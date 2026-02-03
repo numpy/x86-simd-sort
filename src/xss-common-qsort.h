@@ -652,6 +652,7 @@ X86_SIMD_SORT_INLINE void qselect_(type_t *arr,
 template <typename vtype, typename T, bool descending = false>
 X86_SIMD_SORT_INLINE void xss_qsort(T *arr, arrsize_t arrsize, bool hasnan)
 {
+    static_assert(is_valid_vector_type<vtype>(), "Invalid type for qsort!");
     using comparator =
             typename std::conditional<descending,
                                       Comparator<vtype, true>,
@@ -714,6 +715,7 @@ template <typename vtype, typename T, bool descending = false>
 X86_SIMD_SORT_INLINE void
 xss_qselect(T *arr, arrsize_t k, arrsize_t arrsize, bool hasnan)
 {
+    static_assert(is_valid_vector_type<vtype>(), "Invalid type for qselect!");
     using comparator =
             typename std::conditional<descending,
                                       Comparator<vtype, true>,
@@ -756,6 +758,8 @@ template <typename vtype, typename T, bool descending = false>
 X86_SIMD_SORT_INLINE void
 xss_partial_qsort(T *arr, arrsize_t k, arrsize_t arrsize, bool hasnan)
 {
+    static_assert(is_valid_vector_type<vtype>(),
+                  "Invalid type for partial_qsort!");
     if (k == 0) return;
     xss_qselect<vtype, T, descending>(arr, k - 1, arrsize, hasnan);
     xss_qsort<vtype, T, descending>(arr, k - 1, hasnan);

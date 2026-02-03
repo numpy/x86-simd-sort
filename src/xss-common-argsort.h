@@ -584,6 +584,14 @@ X86_SIMD_SORT_INLINE void argselect_(type_t *arr,
                 arr, arg, pos, pivot_index, right, max_iters - 1);
 }
 
+template <typename T, typename vtype>
+X86_SIMD_SORT_FINLINE bool is_sorted(T *arr, arrsize_t arrsize, bool descending)
+{
+    auto comp = descending ? Comparator<vtype, true>::STDSortComparator
+                           : Comparator<vtype, false>::STDSortComparator;
+    return std::is_sorted(arr, arr + arrsize, comp);
+}
+
 /* argsort methods for 32-bit and 64-bit dtypes */
 template <typename T,
           template <typename...>
@@ -600,11 +608,12 @@ X86_SIMD_SORT_INLINE void xss_argsort(T *arr,
     using vectype = typename std::conditional<sizeof(T) == sizeof(int32_t),
                                               half_vector<T>,
                                               full_vector<T>>::type;
-
     using argtype =
             typename std::conditional<sizeof(arrsize_t) == sizeof(int32_t),
                                       half_vector<arrsize_t>,
                                       full_vector<arrsize_t>>::type;
+    static_assert(is_valid_vector_type_key_value<vectype, argtype>(),
+                  "Invalid type for argsort!");
 
     if (arrsize > 1) {
         /* simdargsort does not work for float/double arrays with nan */
@@ -620,9 +629,7 @@ X86_SIMD_SORT_INLINE void xss_argsort(T *arr,
         UNUSED(hasnan);
 
         /* early exit for already sorted arrays: float/double with nan never reach here*/
-        auto comp = descending ? Comparator<vectype, true>::STDSortComparator
-                               : Comparator<vectype, false>::STDSortComparator;
-        if (std::is_sorted(arr, arr + arrsize, comp)) { return; }
+        if (is_sorted<T, vectype>(arr, arrsize, descending)) { return; }
 
 #ifdef XSS_COMPILE_OPENMP
 
@@ -706,11 +713,12 @@ X86_SIMD_SORT_INLINE void xss_argselect(T *arr,
     using vectype = typename std::conditional<sizeof(T) == sizeof(int32_t),
                                               half_vector<T>,
                                               full_vector<T>>::type;
-
     using argtype =
             typename std::conditional<sizeof(arrsize_t) == sizeof(int32_t),
                                       half_vector<arrsize_t>,
                                       full_vector<arrsize_t>>::type;
+    static_assert(is_valid_vector_type_key_value<vectype, argtype>(),
+                  "Invalid type for argselect!");
 
     if (arrsize > 1) {
         if constexpr (xss::fp::is_floating_point_v<T>) {

@@ -99,19 +99,27 @@ constexpr bool always_false = false;
 
 typedef size_t arrsize_t;
 
-template <typename type>
-struct zmm_vector;
+enum class simd_type : int { INVALID, AVX2, AVX512 };
 
 template <typename type>
-struct ymm_vector;
+struct zmm_vector {
+    static constexpr simd_type vec_type = simd_type::INVALID;
+};
 
 template <typename type>
-struct avx2_vector;
+struct ymm_vector {
+    static constexpr simd_type vec_type = simd_type::INVALID;
+};
 
 template <typename type>
-struct avx2_half_vector;
+struct avx2_vector {
+    static constexpr simd_type vec_type = simd_type::INVALID;
+};
 
-enum class simd_type : int { AVX2, AVX512 };
+template <typename type>
+struct avx2_half_vector {
+    static constexpr simd_type vec_type = simd_type::INVALID;
+};
 
 template <typename vtype, typename T = typename vtype::type_t>
 X86_SIMD_SORT_INLINE bool comparison_func(const T &a, const T &b);
@@ -119,5 +127,30 @@ X86_SIMD_SORT_INLINE bool comparison_func(const T &a, const T &b);
 struct float16 {
     uint16_t val;
 };
+
+template <typename vtype>
+constexpr bool is_valid_vector_type()
+{
+    return vtype::vec_type != simd_type::INVALID;
+}
+
+template <typename vtype>
+constexpr bool is_valid_vector_type_32_or_64_bit()
+{
+    if constexpr (is_valid_vector_type<vtype>()) {
+        constexpr int type_size = sizeof(typename vtype::type_t);
+        return type_size == 4 || type_size == 8;
+    }
+    else {
+        return false;
+    }
+}
+
+template <typename vtype1, typename vtype2>
+constexpr bool is_valid_vector_type_key_value()
+{
+    return is_valid_vector_type_32_or_64_bit<vtype1>()
+            && is_valid_vector_type_32_or_64_bit<vtype2>();
+}
 
 #endif // XSS_COMMON_INCLUDES
