@@ -49,10 +49,10 @@ struct zmm_vector<float16> {
 
     static opmask_t ge(reg_t x, reg_t y)
     {
-        reg_t sign_x = _mm512_and_si512(x, _mm512_set1_epi16(0x8000));
-        reg_t sign_y = _mm512_and_si512(y, _mm512_set1_epi16(0x8000));
-        reg_t exp_x = _mm512_and_si512(x, _mm512_set1_epi16(0x7c00));
-        reg_t exp_y = _mm512_and_si512(y, _mm512_set1_epi16(0x7c00));
+        reg_t sign_x = _mm512_and_si512(x, _mm512_set1_epi16(static_cast<short>(0x8000)));
+        reg_t sign_y = _mm512_and_si512(y, _mm512_set1_epi16(static_cast<short>(0x8000)));
+        reg_t exp_x = _mm512_and_si512(x, _mm512_set1_epi16(static_cast<short>(0x7c00)));
+        reg_t exp_y = _mm512_and_si512(y, _mm512_set1_epi16(static_cast<short>(0x7c00)));
         reg_t mant_x = _mm512_and_si512(x, _mm512_set1_epi16(0x3ff));
         reg_t mant_y = _mm512_and_si512(y, _mm512_set1_epi16(0x3ff));
 
@@ -62,7 +62,7 @@ struct zmm_vector<float16> {
         __mmask32 neg = _mm512_mask_cmpeq_epu16_mask(
                 sign_eq,
                 sign_x,
-                _mm512_set1_epi16(0x8000)); // both numbers are -ve
+                _mm512_set1_epi16(static_cast<short>(0x8000))); // both numbers are -ve
 
         // compare exponents only if signs are equal:
         mask_ge = mask_ge
@@ -136,7 +136,7 @@ struct zmm_vector<float16> {
     static type_t float_to_uint16(float val)
     {
         __m128 xmm = _mm_load_ss(&val);
-        __m128i xmm2 = _mm_cvtps_ph(xmm, _MM_FROUND_NO_EXC);
+        __m128i xmm2 = _mm_cvtps_ph(xmm, 0); // Use 0 (round to nearest) instead of _MM_FROUND_NO_EXC
         return _mm_extract_epi16(xmm2, 0);
     }
     static type_t reducemax(reg_t v)
