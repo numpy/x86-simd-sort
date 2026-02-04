@@ -59,6 +59,45 @@ namespace x86simdsort {
 #define CAT_(a, b) a##b
 #define CAT(a, b) CAT_(a, b)
 
+/* runtime dispatch mechanism */
+#define DISPATCH(func, TYPE, ISA) \
+    DECLARE_INTERNAL_##func(TYPE) static XSS_ATTRIBUTE_CONSTRUCTOR void CAT( \
+            CAT(resolve_, func), TYPE)(void) \
+    { \
+        CAT(CAT(internal_, func), TYPE) = &xss::scalar::func<TYPE>; \
+        xss_cpu_init(); \
+        std::string_view preferred_cpu = find_preferred_cpu(ISA); \
+        if constexpr (dispatch_requested("avx512", ISA)) { \
+            if (preferred_cpu.find("avx512") != std::string_view::npos) { \
+                if constexpr (IS_TYPE_FLOAT16<TYPE>()) { \
+                    if (preferred_cpu.find("avx512_spr") \
+                        != std::string_view::npos) { \
+                        CAT(CAT(internal_, func), TYPE) \
+                                = &xss::fp16_spr::func<TYPE>; \
+                        return; \
+                    } \
+                    if (preferred_cpu.find("avx512_icl") \
+                        != std::string_view::npos) { \
+                        CAT(CAT(internal_, func), TYPE) \
+                                = &xss::fp16_icl::func<TYPE>; \
+                        return; \
+                    } \
+                } \
+                else { \
+                    CAT(CAT(internal_, func), TYPE) \
+                            = &xss::avx512::func<TYPE>; \
+                } \
+                return; \
+            } \
+        } \
+        if constexpr (dispatch_requested("avx2", ISA)) { \
+            if (preferred_cpu.find("avx2") != std::string_view::npos) { \
+                CAT(CAT(internal_, func), TYPE) = &xss::avx2::func<TYPE>; \
+                return; \
+            } \
+        } \
+    }
+
 #ifdef _MSC_VER
 #define DECLARE_INTERNAL_qsort(TYPE) \
     static void (*internal_qsort##TYPE)(TYPE *, size_t, bool, bool) = NULL; \
@@ -192,44 +231,6 @@ constexpr bool IS_TYPE_FLOAT16()
     return false;
 }
 
-/* runtime dispatch mechanism */
-#define DISPATCH(func, TYPE, ISA) \
-    DECLARE_INTERNAL_##func(TYPE) static XSS_ATTRIBUTE_CONSTRUCTOR void CAT( \
-            CAT(resolve_, func), TYPE)(void) \
-    { \
-        CAT(CAT(internal_, func), TYPE) = &xss::scalar::func<TYPE>; \
-        xss_cpu_init(); \
-        std::string_view preferred_cpu = find_preferred_cpu(ISA); \
-        if constexpr (dispatch_requested("avx512", ISA)) { \
-            if (preferred_cpu.find("avx512") != std::string_view::npos) { \
-                if constexpr (IS_TYPE_FLOAT16<TYPE>()) { \
-                    if (preferred_cpu.find("avx512_spr") \
-                        != std::string_view::npos) { \
-                        CAT(CAT(internal_, func), TYPE) \
-                                = &xss::fp16_spr::func<TYPE>; \
-                        return; \
-                    } \
-                    if (preferred_cpu.find("avx512_icl") \
-                        != std::string_view::npos) { \
-                        CAT(CAT(internal_, func), TYPE) \
-                                = &xss::fp16_icl::func<TYPE>; \
-                        return; \
-                    } \
-                } \
-                else { \
-                    CAT(CAT(internal_, func), TYPE) \
-                            = &xss::avx512::func<TYPE>; \
-                } \
-                return; \
-            } \
-        } \
-        if constexpr (dispatch_requested("avx2", ISA)) { \
-            if (preferred_cpu.find("avx2") != std::string_view::npos) { \
-                CAT(CAT(internal_, func), TYPE) = &xss::avx2::func<TYPE>; \
-                return; \
-            } \
-        } \
-    }
 
 #define ISA_LIST(...) \
     std::initializer_list<std::string_view> \
