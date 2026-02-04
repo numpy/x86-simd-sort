@@ -59,6 +59,75 @@ namespace x86simdsort {
 #define CAT_(a, b) a##b
 #define CAT(a, b) CAT_(a, b)
 
+#ifdef _MSC_VER
+#define DECLARE_INTERNAL_qsort(TYPE) \
+    static void (*internal_qsort##TYPE)(TYPE *, size_t, bool, bool) = NULL; \
+    template <> \
+    void XSS_EXPORT_SYMBOL qsort(TYPE *arr, size_t arrsize, bool hasnan, bool descending) \
+    { \
+        if (internal_qsort##TYPE == NULL) { \
+            CAT(resolve_qsort, TYPE)(); \
+        } \
+        (*internal_qsort##TYPE)(arr, arrsize, hasnan, descending); \
+    }
+
+#define DECLARE_INTERNAL_qselect(TYPE) \
+    static void (*internal_qselect##TYPE)(TYPE *, size_t, size_t, bool, bool) \
+            = NULL; \
+    template <> \
+    void XSS_EXPORT_SYMBOL qselect( \
+            TYPE *arr, size_t k, size_t arrsize, bool hasnan, bool descending) \
+    { \
+        if (internal_qselect##TYPE == NULL) { \
+            CAT(resolve_qselect, TYPE)(); \
+        } \
+        (*internal_qselect##TYPE)(arr, k, arrsize, hasnan, descending); \
+    }
+
+#define DECLARE_INTERNAL_partial_qsort(TYPE) \
+    static void (*internal_partial_qsort##TYPE)( \
+            TYPE *, size_t, size_t, bool, bool) \
+            = NULL; \
+    template <> \
+    void XSS_EXPORT_SYMBOL partial_qsort( \
+            TYPE *arr, size_t k, size_t arrsize, bool hasnan, bool descending) \
+    { \
+        if (internal_partial_qsort##TYPE == NULL) { \
+            CAT(resolve_partial_qsort, TYPE)(); \
+        } \
+        (*internal_partial_qsort##TYPE)(arr, k, arrsize, hasnan, descending); \
+    }
+
+#define DECLARE_INTERNAL_argsort(TYPE) \
+    static std::vector<size_t> (*internal_argsort##TYPE)( \
+            TYPE *, size_t, bool, bool) \
+            = NULL; \
+    template <> \
+    std::vector<size_t> XSS_EXPORT_SYMBOL argsort( \
+            TYPE *arr, size_t arrsize, bool hasnan, bool descending) \
+    { \
+        if (internal_argsort##TYPE == NULL) { \
+            CAT(resolve_argsort, TYPE)(); \
+        } \
+        return (*internal_argsort##TYPE)(arr, arrsize, hasnan, descending); \
+    }
+
+#define DECLARE_INTERNAL_argselect(TYPE) \
+    static std::vector<size_t> (*internal_argselect##TYPE)( \
+            TYPE *, size_t, size_t, bool) \
+            = NULL; \
+    template <> \
+    std::vector<size_t> XSS_EXPORT_SYMBOL argselect( \
+            TYPE *arr, size_t k, size_t arrsize, bool hasnan) \
+    { \
+        if (internal_argselect##TYPE == NULL) { \
+            CAT(resolve_argselect, TYPE)(); \
+        } \
+        return (*internal_argselect##TYPE)(arr, k, arrsize, hasnan); \
+    }
+
+#else
+
 #define DECLARE_INTERNAL_qsort(TYPE) \
     static void (*internal_qsort##TYPE)(TYPE *, size_t, bool, bool) = NULL; \
     template <> \
@@ -109,6 +178,8 @@ namespace x86simdsort {
     { \
         return (*internal_argselect##TYPE)(arr, k, arrsize, hasnan); \
     }
+
+#endif // _MSC_VER
 
 /* simple constexpr function as a way around having #ifdef __FLT16_MAX__ block
  * within the DISPATCH macro */
