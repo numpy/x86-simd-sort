@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <iostream>
 #include <string>
+#include <mutex>
 
 #ifdef _MSC_VER
 #include <intrin.h>
@@ -200,27 +201,27 @@ namespace x86simdsort {
 
 #define DECLARE_INTERNAL_qsort(TYPE) \
     static void (*internal_qsort##TYPE)(TYPE *, size_t, bool, bool) = NULL; \
+    static std::once_flag CAT(CAT(init_flag_, qsort), TYPE); \
     static void CAT(CAT(init_, qsort), TYPE)(); \
     template <> \
     void qsort(TYPE *arr, size_t arrsize, bool hasnan, bool descending) \
     { \
-        if (internal_qsort##TYPE == NULL) { \
-            CAT(CAT(init_, qsort), TYPE)(); \
-        } \
+        std::call_once(CAT(CAT(init_flag_, qsort), TYPE), \
+                       CAT(CAT(init_, qsort), TYPE)); \
         (*internal_qsort##TYPE)(arr, arrsize, hasnan, descending); \
     }
 
 #define DECLARE_INTERNAL_qselect(TYPE) \
     static void (*internal_qselect##TYPE)(TYPE *, size_t, size_t, bool, bool) \
             = NULL; \
+    static std::once_flag CAT(CAT(init_flag_, qselect), TYPE); \
     static void CAT(CAT(init_, qselect), TYPE)(); \
     template <> \
     void qselect( \
             TYPE *arr, size_t k, size_t arrsize, bool hasnan, bool descending) \
     { \
-        if (internal_qselect##TYPE == NULL) { \
-            CAT(CAT(init_, qselect), TYPE)(); \
-        } \
+        std::call_once(CAT(CAT(init_flag_, qselect), TYPE), \
+                       CAT(CAT(init_, qselect), TYPE)); \
         (*internal_qselect##TYPE)(arr, k, arrsize, hasnan, descending); \
     }
 
@@ -228,14 +229,14 @@ namespace x86simdsort {
     static void (*internal_partial_qsort##TYPE)( \
             TYPE *, size_t, size_t, bool, bool) \
             = NULL; \
+    static std::once_flag CAT(CAT(init_flag_, partial_qsort), TYPE); \
     static void CAT(CAT(init_, partial_qsort), TYPE)(); \
     template <> \
     void partial_qsort( \
             TYPE *arr, size_t k, size_t arrsize, bool hasnan, bool descending) \
     { \
-        if (internal_partial_qsort##TYPE == NULL) { \
-            CAT(CAT(init_, partial_qsort), TYPE)(); \
-        } \
+        std::call_once(CAT(CAT(init_flag_, partial_qsort), TYPE), \
+                       CAT(CAT(init_, partial_qsort), TYPE)); \
         (*internal_partial_qsort##TYPE)(arr, k, arrsize, hasnan, descending); \
     }
 
@@ -243,14 +244,14 @@ namespace x86simdsort {
     static std::vector<size_t> (*internal_argsort##TYPE)( \
             TYPE *, size_t, bool, bool) \
             = NULL; \
+    static std::once_flag CAT(CAT(init_flag_, argsort), TYPE); \
     static void CAT(CAT(init_, argsort), TYPE)(); \
     template <> \
     std::vector<size_t> argsort( \
             TYPE *arr, size_t arrsize, bool hasnan, bool descending) \
     { \
-        if (internal_argsort##TYPE == NULL) { \
-            CAT(CAT(init_, argsort), TYPE)(); \
-        } \
+        std::call_once(CAT(CAT(init_flag_, argsort), TYPE), \
+                       CAT(CAT(init_, argsort), TYPE)); \
         return (*internal_argsort##TYPE)(arr, arrsize, hasnan, descending); \
     }
 
@@ -258,14 +259,14 @@ namespace x86simdsort {
     static std::vector<size_t> (*internal_argselect##TYPE)( \
             TYPE *, size_t, size_t, bool) \
             = NULL; \
+    static std::once_flag CAT(CAT(init_flag_, argselect), TYPE); \
     static void CAT(CAT(init_, argselect), TYPE)(); \
     template <> \
     std::vector<size_t> argselect( \
             TYPE *arr, size_t k, size_t arrsize, bool hasnan) \
     { \
-        if (internal_argselect##TYPE == NULL) { \
-            CAT(CAT(init_, argselect), TYPE)(); \
-        } \
+        std::call_once(CAT(CAT(init_flag_, argselect), TYPE), \
+                       CAT(CAT(init_, argselect), TYPE)); \
         return (*internal_argselect##TYPE)(arr, k, arrsize, hasnan); \
     }
 
@@ -417,6 +418,9 @@ DISPATCH_ALL(argselect,
     static void(CAT(CAT(*internal_keyvalue_partial_sort_, TYPE1), TYPE2))( \
             TYPE1 *, TYPE2 *, size_t, size_t, bool, bool) \
             = NULL; \
+    static std::once_flag CAT(CAT(CAT(CAT(init_flag_, keyvalue_qsort), _), TYPE1), TYPE2); \
+    static std::once_flag CAT(CAT(CAT(CAT(init_flag_, keyvalue_select), _), TYPE1), TYPE2); \
+    static std::once_flag CAT(CAT(CAT(CAT(init_flag_, keyvalue_partial_sort), _), TYPE1), TYPE2); \
     static void CAT(CAT(CAT(CAT(init_, keyvalue_qsort), _), TYPE1), TYPE2)(); \
     static void CAT(CAT(CAT(CAT(init_, keyvalue_select), _), TYPE1), TYPE2)(); \
     static void CAT(CAT(CAT(CAT(init_, keyvalue_partial_sort), _), TYPE1), TYPE2)(); \
@@ -427,9 +431,8 @@ DISPATCH_ALL(argselect,
                         bool hasnan, \
                         bool descending) \
     { \
-        if (CAT(CAT(internal_keyvalue_qsort_, TYPE1), TYPE2) == NULL) { \
-            CAT(CAT(CAT(CAT(init_, keyvalue_qsort), _), TYPE1), TYPE2)(); \
-        } \
+        std::call_once(CAT(CAT(CAT(CAT(init_flag_, keyvalue_qsort), _), TYPE1), TYPE2), \
+                       CAT(CAT(CAT(CAT(init_, keyvalue_qsort), _), TYPE1), TYPE2)); \
         (CAT(CAT(*internal_keyvalue_qsort_, TYPE1), TYPE2))( \
                 key, val, arrsize, hasnan, descending); \
     } \
@@ -441,9 +444,8 @@ DISPATCH_ALL(argselect,
                          bool hasnan, \
                          bool descending) \
     { \
-        if (CAT(CAT(internal_keyvalue_select_, TYPE1), TYPE2) == NULL) { \
-            CAT(CAT(CAT(CAT(init_, keyvalue_select), _), TYPE1), TYPE2)(); \
-        } \
+        std::call_once(CAT(CAT(CAT(CAT(init_flag_, keyvalue_select), _), TYPE1), TYPE2), \
+                       CAT(CAT(CAT(CAT(init_, keyvalue_select), _), TYPE1), TYPE2)); \
         (CAT(CAT(*internal_keyvalue_select_, TYPE1), TYPE2))( \
                 key, val, k, arrsize, hasnan, descending); \
     } \
@@ -455,9 +457,8 @@ DISPATCH_ALL(argselect,
                                bool hasnan, \
                                bool descending) \
     { \
-        if (CAT(CAT(internal_keyvalue_partial_sort_, TYPE1), TYPE2) == NULL) { \
-            CAT(CAT(CAT(CAT(init_, keyvalue_partial_sort), _), TYPE1), TYPE2)(); \
-        } \
+        std::call_once(CAT(CAT(CAT(CAT(init_flag_, keyvalue_partial_sort), _), TYPE1), TYPE2), \
+                       CAT(CAT(CAT(CAT(init_, keyvalue_partial_sort), _), TYPE1), TYPE2)); \
         (CAT(CAT(*internal_keyvalue_partial_sort_, TYPE1), TYPE2))( \
                 key, val, k, arrsize, hasnan, descending); \
     }
