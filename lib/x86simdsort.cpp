@@ -5,6 +5,147 @@
 #include <iostream>
 #include <string>
 
+#ifdef _MSC_VER
+#include <intrin.h>
+
+// MSVC-compatible CPUID wrapper
+static void xss_cpuid(int cpuInfo[4], int function_id, int subfunction_id = 0)
+{
+    __cpuidex(cpuInfo, function_id, subfunction_id);
+}
+
+static bool xss_cpu_supports_avx512f()
+{
+    int cpuInfo[4];
+    xss_cpuid(cpuInfo, 0, 0);
+    int nIds = cpuInfo[0];
+    
+    if (nIds < 7) return false;
+    
+    xss_cpuid(cpuInfo, 7, 0);
+    return (cpuInfo[1] & (1 << 16)) != 0; // AVX512F is bit 16 of EBX
+}
+
+static bool xss_cpu_supports_avx512dq()
+{
+    int cpuInfo[4];
+    xss_cpuid(cpuInfo, 0, 0);
+    int nIds = cpuInfo[0];
+    
+    if (nIds < 7) return false;
+    
+    xss_cpuid(cpuInfo, 7, 0);
+    return (cpuInfo[1] & (1 << 17)) != 0; // AVX512DQ is bit 17 of EBX
+}
+
+static bool xss_cpu_supports_avx512vl()
+{
+    int cpuInfo[4];
+    xss_cpuid(cpuInfo, 0, 0);
+    int nIds = cpuInfo[0];
+    
+    if (nIds < 7) return false;
+    
+    xss_cpuid(cpuInfo, 7, 0);
+    return (cpuInfo[1] & (1 << 31)) != 0; // AVX512VL is bit 31 of EBX
+}
+
+static bool xss_cpu_supports_avx512bw()
+{
+    int cpuInfo[4];
+    xss_cpuid(cpuInfo, 0, 0);
+    int nIds = cpuInfo[0];
+    
+    if (nIds < 7) return false;
+    
+    xss_cpuid(cpuInfo, 7, 0);
+    return (cpuInfo[1] & (1 << 30)) != 0; // AVX512BW is bit 30 of EBX
+}
+
+static bool xss_cpu_supports_avx512vbmi2()
+{
+    int cpuInfo[4];
+    xss_cpuid(cpuInfo, 0, 0);
+    int nIds = cpuInfo[0];
+    
+    if (nIds < 7) return false;
+    
+    xss_cpuid(cpuInfo, 7, 0);
+    return (cpuInfo[2] & (1 << 6)) != 0; // AVX512VBMI2 is bit 6 of ECX
+}
+
+static bool xss_cpu_supports_avx512fp16()
+{
+    int cpuInfo[4];
+    xss_cpuid(cpuInfo, 0, 0);
+    int nIds = cpuInfo[0];
+    
+    if (nIds < 7) return false;
+    
+    xss_cpuid(cpuInfo, 7, 0);
+    return (cpuInfo[3] & (1 << 23)) != 0; // AVX512FP16 is bit 23 of EDX
+}
+
+static bool xss_cpu_supports_avx2()
+{
+    int cpuInfo[4];
+    xss_cpuid(cpuInfo, 0, 0);
+    int nIds = cpuInfo[0];
+    
+    if (nIds < 7) return false;
+    
+    xss_cpuid(cpuInfo, 7, 0);
+    return (cpuInfo[1] & (1 << 5)) != 0; // AVX2 is bit 5 of EBX
+}
+
+static void xss_cpu_init()
+{
+    // MSVC doesn't need explicit CPU init
+}
+
+#else
+// GCC/Clang version using __builtin functions
+static void xss_cpu_init()
+{
+    __builtin_cpu_init();
+}
+
+static bool xss_cpu_supports_avx512f()
+{
+    return __builtin_cpu_supports("avx512f");
+}
+
+static bool xss_cpu_supports_avx512dq()
+{
+    return __builtin_cpu_supports("avx512dq");
+}
+
+static bool xss_cpu_supports_avx512vl()
+{
+    return __builtin_cpu_supports("avx512vl");
+}
+
+static bool xss_cpu_supports_avx512bw()
+{
+    return __builtin_cpu_supports("avx512bw");
+}
+
+static bool xss_cpu_supports_avx512vbmi2()
+{
+    return __builtin_cpu_supports("avx512vbmi2");
+}
+
+static bool xss_cpu_supports_avx512fp16()
+{
+    return __builtin_cpu_supports("avx512fp16");
+}
+
+static bool xss_cpu_supports_avx2()
+{
+    return __builtin_cpu_supports("avx2");
+}
+#endif
+
 static int check_cpu_feature_support(std::string_view cpufeature)
 {
     const char *disable_avx512 = std::getenv("XSS_DISABLE_AVX512");
@@ -12,23 +153,23 @@ static int check_cpu_feature_support(std::string_view cpufeature)
     if ((cpufeature == "avx512_spr") && (!disable_avx512))
 #if defined(__FLT16_MAX__) && !defined(__INTEL_LLVM_COMPILER) \
         && (!defined(__clang_major__) || __clang_major__ >= 18)
-        return __builtin_cpu_supports("avx512f")
-                && __builtin_cpu_supports("avx512fp16")
-                && __builtin_cpu_supports("avx512vbmi2");
+        return xss_cpu_supports_avx512f()
+                && xss_cpu_supports_avx512fp16()
+                && xss_cpu_supports_avx512vbmi2();
 #else
         return 0;
 #endif
     else if ((cpufeature == "avx512_icl") && (!disable_avx512))
-        return __builtin_cpu_supports("avx512f")
-                && __builtin_cpu_supports("avx512vbmi2")
-                && __builtin_cpu_supports("avx512bw")
-                && __builtin_cpu_supports("avx512vl");
+        return xss_cpu_supports_avx512f()
+                && xss_cpu_supports_avx512vbmi2()
+                && xss_cpu_supports_avx512bw()
+                && xss_cpu_supports_avx512vl();
     else if ((cpufeature == "avx512_skx") && (!disable_avx512))
-        return __builtin_cpu_supports("avx512f")
-                && __builtin_cpu_supports("avx512dq")
-                && __builtin_cpu_supports("avx512vl");
+        return xss_cpu_supports_avx512f()
+                && xss_cpu_supports_avx512dq()
+                && xss_cpu_supports_avx512vl();
     else if (cpufeature == "avx2")
-        return __builtin_cpu_supports("avx2");
+        return xss_cpu_supports_avx2();
 
     return 0;
 }
@@ -59,19 +200,27 @@ namespace x86simdsort {
 
 #define DECLARE_INTERNAL_qsort(TYPE) \
     static void (*internal_qsort##TYPE)(TYPE *, size_t, bool, bool) = NULL; \
+    static void CAT(CAT(init_, qsort), TYPE)(); \
     template <> \
     void qsort(TYPE *arr, size_t arrsize, bool hasnan, bool descending) \
     { \
+        if (internal_qsort##TYPE == NULL) { \
+            CAT(CAT(init_, qsort), TYPE)(); \
+        } \
         (*internal_qsort##TYPE)(arr, arrsize, hasnan, descending); \
     }
 
 #define DECLARE_INTERNAL_qselect(TYPE) \
     static void (*internal_qselect##TYPE)(TYPE *, size_t, size_t, bool, bool) \
             = NULL; \
+    static void CAT(CAT(init_, qselect), TYPE)(); \
     template <> \
     void qselect( \
             TYPE *arr, size_t k, size_t arrsize, bool hasnan, bool descending) \
     { \
+        if (internal_qselect##TYPE == NULL) { \
+            CAT(CAT(init_, qselect), TYPE)(); \
+        } \
         (*internal_qselect##TYPE)(arr, k, arrsize, hasnan, descending); \
     }
 
@@ -79,10 +228,14 @@ namespace x86simdsort {
     static void (*internal_partial_qsort##TYPE)( \
             TYPE *, size_t, size_t, bool, bool) \
             = NULL; \
+    static void CAT(CAT(init_, partial_qsort), TYPE)(); \
     template <> \
     void partial_qsort( \
             TYPE *arr, size_t k, size_t arrsize, bool hasnan, bool descending) \
     { \
+        if (internal_partial_qsort##TYPE == NULL) { \
+            CAT(CAT(init_, partial_qsort), TYPE)(); \
+        } \
         (*internal_partial_qsort##TYPE)(arr, k, arrsize, hasnan, descending); \
     }
 
@@ -90,10 +243,14 @@ namespace x86simdsort {
     static std::vector<size_t> (*internal_argsort##TYPE)( \
             TYPE *, size_t, bool, bool) \
             = NULL; \
+    static void CAT(CAT(init_, argsort), TYPE)(); \
     template <> \
     std::vector<size_t> argsort( \
             TYPE *arr, size_t arrsize, bool hasnan, bool descending) \
     { \
+        if (internal_argsort##TYPE == NULL) { \
+            CAT(CAT(init_, argsort), TYPE)(); \
+        } \
         return (*internal_argsort##TYPE)(arr, arrsize, hasnan, descending); \
     }
 
@@ -101,10 +258,14 @@ namespace x86simdsort {
     static std::vector<size_t> (*internal_argselect##TYPE)( \
             TYPE *, size_t, size_t, bool) \
             = NULL; \
+    static void CAT(CAT(init_, argselect), TYPE)(); \
     template <> \
     std::vector<size_t> argselect( \
             TYPE *arr, size_t k, size_t arrsize, bool hasnan) \
     { \
+        if (internal_argselect##TYPE == NULL) { \
+            CAT(CAT(init_, argselect), TYPE)(); \
+        } \
         return (*internal_argselect##TYPE)(arr, k, arrsize, hasnan); \
     }
 
@@ -120,12 +281,14 @@ constexpr bool IS_TYPE_FLOAT16()
 }
 
 /* runtime dispatch mechanism */
+#ifdef _MSC_VER
+// MSVC doesn't support __attribute__((constructor)), so we use lazy initialization
 #define DISPATCH(func, TYPE, ISA) \
-    DECLARE_INTERNAL_##func(TYPE) static __attribute__((constructor)) void \
-    CAT(CAT(resolve_, func), TYPE)(void) \
+    DECLARE_INTERNAL_##func(TYPE) \
+    static void CAT(CAT(init_, func), TYPE)(void) \
     { \
         CAT(CAT(internal_, func), TYPE) = &xss::scalar::func<TYPE>; \
-        __builtin_cpu_init(); \
+        xss_cpu_init(); \
         std::string_view preferred_cpu = find_preferred_cpu(ISA); \
         if constexpr (dispatch_requested("avx512", ISA)) { \
             if (preferred_cpu.find("avx512") != std::string_view::npos) { \
@@ -157,6 +320,46 @@ constexpr bool IS_TYPE_FLOAT16()
             } \
         } \
     }
+#else
+// GCC/Clang version using __attribute__((constructor))
+#define DISPATCH(func, TYPE, ISA) \
+    DECLARE_INTERNAL_##func(TYPE) static __attribute__((constructor)) void \
+    CAT(CAT(init_, func), TYPE)(void) \
+    { \
+        CAT(CAT(internal_, func), TYPE) = &xss::scalar::func<TYPE>; \
+        xss_cpu_init(); \
+        std::string_view preferred_cpu = find_preferred_cpu(ISA); \
+        if constexpr (dispatch_requested("avx512", ISA)) { \
+            if (preferred_cpu.find("avx512") != std::string_view::npos) { \
+                if constexpr (IS_TYPE_FLOAT16<TYPE>()) { \
+                    if (preferred_cpu.find("avx512_spr") \
+                        != std::string_view::npos) { \
+                        CAT(CAT(internal_, func), TYPE) \
+                                = &xss::fp16_spr::func<TYPE>; \
+                        return; \
+                    } \
+                    if (preferred_cpu.find("avx512_icl") \
+                        != std::string_view::npos) { \
+                        CAT(CAT(internal_, func), TYPE) \
+                                = &xss::fp16_icl::func<TYPE>; \
+                        return; \
+                    } \
+                } \
+                else { \
+                    CAT(CAT(internal_, func), TYPE) \
+                            = &xss::avx512::func<TYPE>; \
+                } \
+                return; \
+            } \
+        } \
+        if constexpr (dispatch_requested("avx2", ISA)) { \
+            if (preferred_cpu.find("avx2") != std::string_view::npos) { \
+                CAT(CAT(internal_, func), TYPE) = &xss::avx2::func<TYPE>; \
+                return; \
+            } \
+        } \
+    }
+#endif
 
 #define ISA_LIST(...) \
     std::initializer_list<std::string_view> \
@@ -214,6 +417,9 @@ DISPATCH_ALL(argselect,
     static void(CAT(CAT(*internal_keyvalue_partial_sort_, TYPE1), TYPE2))( \
             TYPE1 *, TYPE2 *, size_t, size_t, bool, bool) \
             = NULL; \
+    static void CAT(CAT(CAT(CAT(init_, keyvalue_qsort), _), TYPE1), TYPE2)(); \
+    static void CAT(CAT(CAT(CAT(init_, keyvalue_select), _), TYPE1), TYPE2)(); \
+    static void CAT(CAT(CAT(CAT(init_, keyvalue_partial_sort), _), TYPE1), TYPE2)(); \
     template <> \
     void keyvalue_qsort(TYPE1 *key, \
                         TYPE2 *val, \
@@ -221,6 +427,9 @@ DISPATCH_ALL(argselect,
                         bool hasnan, \
                         bool descending) \
     { \
+        if (CAT(CAT(internal_keyvalue_qsort_, TYPE1), TYPE2) == NULL) { \
+            CAT(CAT(CAT(CAT(init_, keyvalue_qsort), _), TYPE1), TYPE2)(); \
+        } \
         (CAT(CAT(*internal_keyvalue_qsort_, TYPE1), TYPE2))( \
                 key, val, arrsize, hasnan, descending); \
     } \
@@ -232,6 +441,9 @@ DISPATCH_ALL(argselect,
                          bool hasnan, \
                          bool descending) \
     { \
+        if (CAT(CAT(internal_keyvalue_select_, TYPE1), TYPE2) == NULL) { \
+            CAT(CAT(CAT(CAT(init_, keyvalue_select), _), TYPE1), TYPE2)(); \
+        } \
         (CAT(CAT(*internal_keyvalue_select_, TYPE1), TYPE2))( \
                 key, val, k, arrsize, hasnan, descending); \
     } \
@@ -243,17 +455,20 @@ DISPATCH_ALL(argselect,
                                bool hasnan, \
                                bool descending) \
     { \
+        if (CAT(CAT(internal_keyvalue_partial_sort_, TYPE1), TYPE2) == NULL) { \
+            CAT(CAT(CAT(CAT(init_, keyvalue_partial_sort), _), TYPE1), TYPE2)(); \
+        } \
         (CAT(CAT(*internal_keyvalue_partial_sort_, TYPE1), TYPE2))( \
                 key, val, k, arrsize, hasnan, descending); \
     }
 
+#ifdef _MSC_VER
 #define DISPATCH_KV_FUNC(func, TYPE1, TYPE2, ISA) \
-    static __attribute__((constructor)) void CAT( \
-            CAT(CAT(CAT(resolve_, func), _), TYPE1), TYPE2)(void) \
+    static void CAT(CAT(CAT(CAT(init_, func), _), TYPE1), TYPE2)(void) \
     { \
         CAT(CAT(CAT(CAT(internal_, func), _), TYPE1), TYPE2) \
                 = &xss::scalar::func<TYPE1, TYPE2>; \
-        __builtin_cpu_init(); \
+        xss_cpu_init(); \
         std::string_view preferred_cpu = find_preferred_cpu(ISA); \
         if constexpr (dispatch_requested("avx512", ISA)) { \
             if (preferred_cpu.find("avx512") != std::string_view::npos) { \
@@ -270,6 +485,31 @@ DISPATCH_ALL(argselect,
             } \
         } \
     }
+#else
+#define DISPATCH_KV_FUNC(func, TYPE1, TYPE2, ISA) \
+    static __attribute__((constructor)) void CAT( \
+            CAT(CAT(CAT(init_, func), _), TYPE1), TYPE2)(void) \
+    { \
+        CAT(CAT(CAT(CAT(internal_, func), _), TYPE1), TYPE2) \
+                = &xss::scalar::func<TYPE1, TYPE2>; \
+        xss_cpu_init(); \
+        std::string_view preferred_cpu = find_preferred_cpu(ISA); \
+        if constexpr (dispatch_requested("avx512", ISA)) { \
+            if (preferred_cpu.find("avx512") != std::string_view::npos) { \
+                CAT(CAT(CAT(CAT(internal_, func), _), TYPE1), TYPE2) \
+                        = &xss::avx512::func<TYPE1, TYPE2>; \
+                return; \
+            } \
+        } \
+        if constexpr (dispatch_requested("avx2", ISA)) { \
+            if (preferred_cpu.find("avx2") != std::string_view::npos) { \
+                CAT(CAT(CAT(CAT(internal_, func), _), TYPE1), TYPE2) \
+                        = &xss::avx2::func<TYPE1, TYPE2>; \
+                return; \
+            } \
+        } \
+    }
+#endif
 
 #define DISPATCH_KEYVALUE_SORT(TYPE1, TYPE2, ISA) \
     DECLARE_ALL_KEYVALUE_METHODS(TYPE1, TYPE2) \

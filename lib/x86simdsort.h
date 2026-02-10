@@ -6,8 +6,17 @@
 #include <functional>
 #include <numeric>
 
-#define XSS_EXPORT_SYMBOL __attribute__((visibility("default")))
-#define XSS_HIDE_SYMBOL __attribute__((visibility("hidden")))
+#ifdef _MSC_VER
+    #ifdef XSS_BUILD_SHARED
+        #define XSS_EXPORT_SYMBOL __declspec(dllexport)
+    #else
+        #define XSS_EXPORT_SYMBOL __declspec(dllimport)
+    #endif
+    #define XSS_HIDE_SYMBOL
+#else
+    #define XSS_EXPORT_SYMBOL __attribute__((visibility("default")))
+    #define XSS_HIDE_SYMBOL __attribute__((visibility("hidden")))
+#endif
 #define UNUSED(x) (void)(x)
 
 namespace x86simdsort {
