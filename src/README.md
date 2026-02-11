@@ -63,7 +63,7 @@ Equivalent to `np.argsort` in
 [NumPy](https://numpy.org/doc/stable/reference/generated/numpy.argsort.html).
 
 ```cpp
-void x86simdsortStatic::argsort<T>(T* arr, size_t *arg, size_t arrsize, bool hasnan = false, bool descending = false);
+void x86simdsortStatic::argsort<T>(const T* arr, size_t *arg, size_t arrsize, bool hasnan = false, bool descending = false);
 ```
 Supported datatypes: `uint32_t`, `int32_t`, `float`, `uint64_t`, `int64_t` and
 `double`.
