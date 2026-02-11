@@ -675,8 +675,10 @@ X86_SIMD_SORT_INLINE void avx512_argsort(T *arr,
                                          bool hasnan = false,
                                          bool descending = false)
 {
-    xss_argsort<T, zmm_vector, ymm_vector>(
-            arr, arg, arrsize, hasnan, descending);
+    // Safe: argsort never mutates arr; const is dropped only for SIMD type instantiation
+    using base_t = std::remove_const_t<T>;
+    xss_argsort<base_t, zmm_vector, ymm_vector>(
+            const_cast<base_t *>(arr), arg, arrsize, hasnan, descending);
 }
 
 template <typename T>
@@ -686,8 +688,10 @@ X86_SIMD_SORT_INLINE void avx2_argsort(T *arr,
                                        bool hasnan = false,
                                        bool descending = false)
 {
-    xss_argsort<T, avx2_vector, avx2_half_vector>(
-            arr, arg, arrsize, hasnan, descending);
+    // Safe: argsort never mutates arr; const is dropped only for SIMD type instantiation
+    using base_t = std::remove_const_t<T>;
+    xss_argsort<base_t, avx2_vector, avx2_half_vector>(
+            const_cast<base_t *>(arr), arg, arrsize, hasnan, descending);
 }
 
 /* argselect methods for 32-bit and 64-bit dtypes */
