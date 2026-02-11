@@ -71,7 +71,7 @@ namespace scalar {
     }
     template <typename T>
     std::vector<size_t>
-    argsort(T *arr, size_t arrsize, bool hasnan, bool reversed)
+    argsort(const T *arr, size_t arrsize, bool hasnan, bool reversed)
     {
         UNUSED(hasnan);
         std::vector<size_t> arg(arrsize);
