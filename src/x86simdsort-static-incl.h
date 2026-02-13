@@ -25,8 +25,10 @@ X86_SIMD_SORT_FINLINE void partial_qsort(T *arr,
                                          bool descending = false);
 
 template <typename T>
-X86_SIMD_SORT_FINLINE std::vector<size_t>
-argsort(const T *arr, size_t size, bool hasnan = false, bool descending = false);
+X86_SIMD_SORT_FINLINE std::vector<size_t> argsort(const T *arr,
+                                                  size_t size,
+                                                  bool hasnan = false,
+                                                  bool descending = false);
 
 /* argsort API required by NumPy: */
 template <typename T>
@@ -90,14 +92,17 @@ X86_SIMD_SORT_FINLINE void keyvalue_partial_sort(T1 *key,
         ISA##_partial_qsort(arr, k, size, hasnan, descending); \
     } \
     template <typename T> \
-    X86_SIMD_SORT_FINLINE void x86simdsortStatic::argsort( \
-            const T *arr, size_t *arg, size_t size, bool hasnan, bool descending) \
+    X86_SIMD_SORT_FINLINE void x86simdsortStatic::argsort(const T *arr, \
+                                                          size_t *arg, \
+                                                          size_t size, \
+                                                          bool hasnan, \
+                                                          bool descending) \
     { \
         ISA##_argsort(arr, arg, size, hasnan, descending); \
     } \
     template <typename T> \
     X86_SIMD_SORT_FINLINE std::vector<size_t> x86simdsortStatic::argsort( \
-        const T *arr, size_t size, bool hasnan, bool descending) \
+            const T *arr, size_t size, bool hasnan, bool descending) \
     { \
         std::vector<size_t> indices(size); \
         std::iota(indices.begin(), indices.end(), 0); \

@@ -35,8 +35,10 @@ XSS_EXPORT_SYMBOL void partial_qsort(T *arr,
 
 // argsort
 template <typename T>
-XSS_EXPORT_SYMBOL std::vector<size_t>
-argsort(const T *arr, size_t arrsize, bool hasnan = false, bool descending = false);
+XSS_EXPORT_SYMBOL std::vector<size_t> argsort(const T *arr,
+                                              size_t arrsize,
+                                              bool hasnan = false,
+                                              bool descending = false);
 
 // argselect
 template <typename T>

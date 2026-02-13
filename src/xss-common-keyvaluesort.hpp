@@ -563,10 +563,8 @@ X86_SIMD_SORT_INLINE void kvselect_(type1_t *keys,
 
 template <typename T1,
           typename T2,
-          template <typename...>
-          typename full_vector,
-          template <typename...>
-          typename half_vector>
+          template <typename...> typename full_vector,
+          template <typename...> typename half_vector>
 X86_SIMD_SORT_INLINE void xss_qsort_kv(
         T1 *keys, T2 *indexes, arrsize_t arrsize, bool hasnan, bool descending)
 {
@@ -654,10 +652,8 @@ X86_SIMD_SORT_INLINE void xss_qsort_kv(
 
 template <typename T1,
           typename T2,
-          template <typename...>
-          typename full_vector,
-          template <typename...>
-          typename half_vector>
+          template <typename...> typename full_vector,
+          template <typename...> typename half_vector>
 X86_SIMD_SORT_INLINE void xss_select_kv(T1 *keys,
                                         T2 *indexes,
                                         arrsize_t k,
@@ -719,10 +715,8 @@ X86_SIMD_SORT_INLINE void xss_select_kv(T1 *keys,
 
 template <typename T1,
           typename T2,
-          template <typename...>
-          typename full_vector,
-          template <typename...>
-          typename half_vector>
+          template <typename...> typename full_vector,
+          template <typename...> typename half_vector>
 X86_SIMD_SORT_INLINE void xss_partial_sort_kv(T1 *keys,
                                               T2 *indexes,
                                               arrsize_t k,
