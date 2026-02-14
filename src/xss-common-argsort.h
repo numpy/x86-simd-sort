@@ -586,10 +586,8 @@ X86_SIMD_SORT_INLINE void argselect_(type_t *arr,
 
 /* argsort methods for 32-bit and 64-bit dtypes */
 template <typename T,
-          template <typename...>
-          typename full_vector,
-          template <typename...>
-          typename half_vector>
+          template <typename...> typename full_vector,
+          template <typename...> typename half_vector>
 X86_SIMD_SORT_INLINE void xss_argsort(T *arr,
                                       arrsize_t *arg,
                                       arrsize_t arrsize,
@@ -696,10 +694,8 @@ X86_SIMD_SORT_INLINE void avx2_argsort(T *arr,
 
 /* argselect methods for 32-bit and 64-bit dtypes */
 template <typename T,
-          template <typename...>
-          typename full_vector,
-          template <typename...>
-          typename half_vector>
+          template <typename...> typename full_vector,
+          template <typename...> typename half_vector>
 X86_SIMD_SORT_INLINE void xss_argselect(T *arr,
                                         arrsize_t *arg,
                                         arrsize_t k,
