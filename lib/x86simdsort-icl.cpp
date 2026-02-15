@@ -5,7 +5,6 @@
 #include "avx512-16bit-qsort.hpp"
 #endif
 
-
 namespace xss {
 namespace avx512 {
     template <>

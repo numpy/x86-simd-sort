@@ -102,11 +102,10 @@ namespace x86simdsort {
     static void CAT(resolve_qsort, TYPE)(void); \
     static void (*internal_qsort##TYPE)(TYPE *, size_t, bool, bool) = NULL; \
     template <> \
-    void XSS_EXPORT_SYMBOL qsort(TYPE *arr, size_t arrsize, bool hasnan, bool descending) \
+    void XSS_EXPORT_SYMBOL qsort( \
+            TYPE *arr, size_t arrsize, bool hasnan, bool descending) \
     { \
-        if (internal_qsort##TYPE == NULL) { \
-            CAT(resolve_qsort, TYPE)(); \
-        } \
+        if (internal_qsort##TYPE == NULL) { CAT(resolve_qsort, TYPE)(); } \
         (*internal_qsort##TYPE)(arr, arrsize, hasnan, descending); \
     }
 
@@ -118,9 +117,7 @@ namespace x86simdsort {
     void XSS_EXPORT_SYMBOL qselect( \
             TYPE *arr, size_t k, size_t arrsize, bool hasnan, bool descending) \
     { \
-        if (internal_qselect##TYPE == NULL) { \
-            CAT(resolve_qselect, TYPE)(); \
-        } \
+        if (internal_qselect##TYPE == NULL) { CAT(resolve_qselect, TYPE)(); } \
         (*internal_qselect##TYPE)(arr, k, arrsize, hasnan, descending); \
     }
 
@@ -148,9 +145,7 @@ namespace x86simdsort {
     std::vector<size_t> XSS_EXPORT_SYMBOL argsort( \
             TYPE *arr, size_t arrsize, bool hasnan, bool descending) \
     { \
-        if (internal_argsort##TYPE == NULL) { \
-            CAT(resolve_argsort, TYPE)(); \
-        } \
+        if (internal_argsort##TYPE == NULL) { CAT(resolve_argsort, TYPE)(); } \
         return (*internal_argsort##TYPE)(arr, arrsize, hasnan, descending); \
     }
 
@@ -234,7 +229,6 @@ constexpr bool IS_TYPE_FLOAT16()
 #endif
     return false;
 }
-
 
 #define ISA_LIST(...) \
     std::initializer_list<std::string_view> \
@@ -322,10 +316,10 @@ DISPATCH_ALL(argselect,
             = NULL; \
     template <> \
     void XSS_EXPORT_SYMBOL keyvalue_qsort(TYPE1 *key, \
-                        TYPE2 *val, \
-                        size_t arrsize, \
-                        bool hasnan, \
-                        bool descending) \
+                                          TYPE2 *val, \
+                                          size_t arrsize, \
+                                          bool hasnan, \
+                                          bool descending) \
     { \
         if ((CAT(CAT(*internal_keyvalue_qsort_, TYPE1), TYPE2)) == NULL) { \
             CAT(CAT(resolve_keyvalue_qsort_, TYPE1), TYPE2)(); \
@@ -335,11 +329,11 @@ DISPATCH_ALL(argselect,
     } \
     template <> \
     void XSS_EXPORT_SYMBOL keyvalue_select(TYPE1 *key, \
-                         TYPE2 *val, \
-                         size_t k, \
-                         size_t arrsize, \
-                         bool hasnan, \
-                         bool descending) \
+                                           TYPE2 *val, \
+                                           size_t k, \
+                                           size_t arrsize, \
+                                           bool hasnan, \
+                                           bool descending) \
     { \
         if ((CAT(CAT(*internal_keyvalue_select_, TYPE1), TYPE2)) == NULL) { \
             CAT(CAT(resolve_keyvalue_select_, TYPE1), TYPE2)(); \
@@ -349,13 +343,14 @@ DISPATCH_ALL(argselect,
     } \
     template <> \
     void XSS_EXPORT_SYMBOL keyvalue_partial_sort(TYPE1 *key, \
-                               TYPE2 *val, \
-                               size_t k, \
-                               size_t arrsize, \
-                               bool hasnan, \
-                               bool descending) \
+                                                 TYPE2 *val, \
+                                                 size_t k, \
+                                                 size_t arrsize, \
+                                                 bool hasnan, \
+                                                 bool descending) \
     { \
-        if ((CAT(CAT(*internal_keyvalue_partial_sort_, TYPE1), TYPE2)) == NULL) { \
+        if ((CAT(CAT(*internal_keyvalue_partial_sort_, TYPE1), TYPE2)) \
+            == NULL) { \
             CAT(CAT(resolve_keyvalue_partial_sort_, TYPE1), TYPE2)(); \
         } \
         (CAT(CAT(*internal_keyvalue_partial_sort_, TYPE1), TYPE2))( \
