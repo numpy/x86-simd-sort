@@ -98,7 +98,6 @@ namespace x86simdsort {
         } \
     }
 
-#ifdef _MSC_VER
 #define DECLARE_INTERNAL_qsort(TYPE) \
     static void CAT(resolve_qsort, TYPE)(void); \
     static void (*internal_qsort##TYPE)(TYPE *, size_t, bool, bool) = NULL; \
@@ -308,7 +307,6 @@ DISPATCH_ALL(argselect,
         } \
     }
 
-#ifdef _MSC_VER
 #define DECLARE_ALL_KEYVALUE_METHODS(TYPE1, TYPE2) \
     static void CAT(CAT(resolve_keyvalue_select_, TYPE1), TYPE2)(void); \
     static void CAT(CAT(resolve_keyvalue_partial_sort_, TYPE1), TYPE2)(void); \
@@ -363,51 +361,6 @@ DISPATCH_ALL(argselect,
         (CAT(CAT(*internal_keyvalue_partial_sort_, TYPE1), TYPE2))( \
                 key, val, k, arrsize, hasnan, descending); \
     }
-#else
-#define DECLARE_ALL_KEYVALUE_METHODS(TYPE1, TYPE2) \
-    static void(CAT(CAT(*internal_keyvalue_qsort_, TYPE1), TYPE2))( \
-            TYPE1 *, TYPE2 *, size_t, bool, bool) \
-            = NULL; \
-    static void(CAT(CAT(*internal_keyvalue_select_, TYPE1), TYPE2))( \
-            TYPE1 *, TYPE2 *, size_t, size_t, bool, bool) \
-            = NULL; \
-    static void(CAT(CAT(*internal_keyvalue_partial_sort_, TYPE1), TYPE2))( \
-            TYPE1 *, TYPE2 *, size_t, size_t, bool, bool) \
-            = NULL; \
-    template <> \
-    void XSS_EXPORT_SYMBOL keyvalue_qsort(TYPE1 *key, \
-                        TYPE2 *val, \
-                        size_t arrsize, \
-                        bool hasnan, \
-                        bool descending) \
-    { \
-        (CAT(CAT(*internal_keyvalue_qsort_, TYPE1), TYPE2))( \
-                key, val, arrsize, hasnan, descending); \
-    } \
-    template <> \
-    void XSS_EXPORT_SYMBOL keyvalue_select(TYPE1 *key, \
-                         TYPE2 *val, \
-                         size_t k, \
-                         size_t arrsize, \
-                         bool hasnan, \
-                         bool descending) \
-    { \
-        (CAT(CAT(*internal_keyvalue_select_, TYPE1), TYPE2))( \
-                key, val, k, arrsize, hasnan, descending); \
-    } \
-    template <> \
-    void XSS_EXPORT_SYMBOL keyvalue_partial_sort(TYPE1 *key, \
-                               TYPE2 *val, \
-                               size_t k, \
-                               size_t arrsize, \
-                               bool hasnan, \
-                               bool descending) \
-    { \
-        (CAT(CAT(*internal_keyvalue_partial_sort_, TYPE1), TYPE2))( \
-                key, val, k, arrsize, hasnan, descending); \
-    }
-#endif // _MSC_VER
-
 
 #define DISPATCH_KEYVALUE_SORT(TYPE1, TYPE2, ISA) \
     DECLARE_ALL_KEYVALUE_METHODS(TYPE1, TYPE2) \
