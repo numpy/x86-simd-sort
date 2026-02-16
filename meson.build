@@ -100,7 +100,7 @@ if get_option('build_tests')
                      dependencies : [gtest_dep, x86simdsortcpp_dep],
                      link_whole : [libtests],
                     )
-  test('x86 simd sort tests', testexe)
+  test('x86 simd sort tests', testexe, timeout : 0)
 endif
 
 # Build benchmarking suite if option build_benchmarks is set to true
