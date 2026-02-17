@@ -23,7 +23,7 @@
     } \
     template <> \
     std::vector<size_t> argsort( \
-            type *arr, size_t arrsize, bool hasnan, bool descending) \
+            const type *arr, size_t arrsize, bool hasnan, bool descending) \
     { \
         return x86simdsortStatic::argsort(arr, arrsize, hasnan, descending); \
     } \

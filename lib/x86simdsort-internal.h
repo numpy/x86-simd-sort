@@ -44,7 +44,7 @@
                                                bool hasnan = false, \
                                                bool descending = false); \
     template <typename T> \
-    XSS_HIDE_SYMBOL std::vector<size_t> argsort(T *arr, \
+    XSS_HIDE_SYMBOL std::vector<size_t> argsort(const T *arr, \
                                                 size_t arrsize, \
                                                 bool hasnan = false, \
                                                 bool descending = false); \
