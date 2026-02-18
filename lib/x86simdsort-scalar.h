@@ -88,7 +88,8 @@ namespace scalar {
         return arg;
     }
     template <typename T>
-    std::vector<size_t> argselect(T *arr, size_t k, size_t arrsize, bool hasnan)
+    std::vector<size_t>
+    argselect(const T *arr, size_t k, size_t arrsize, bool hasnan)
     {
         UNUSED(hasnan);
         std::vector<size_t> arg(arrsize);

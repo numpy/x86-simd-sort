@@ -43,7 +43,7 @@ XSS_EXPORT_SYMBOL std::vector<size_t> argsort(const T *arr,
 // argselect
 template <typename T>
 XSS_EXPORT_SYMBOL std::vector<size_t>
-argselect(T *arr, size_t k, size_t arrsize, bool hasnan = false);
+argselect(const T *arr, size_t k, size_t arrsize, bool hasnan = false);
 
 // keyvalue sort
 template <typename T1, typename T2>

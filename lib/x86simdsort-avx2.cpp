@@ -29,7 +29,7 @@
     } \
     template <> \
     std::vector<size_t> argselect( \
-            type *arr, size_t k, size_t arrsize, bool hasnan) \
+            const type *arr, size_t k, size_t arrsize, bool hasnan) \
     { \
         return x86simdsortStatic::argselect(arr, k, arrsize, hasnan); \
     }

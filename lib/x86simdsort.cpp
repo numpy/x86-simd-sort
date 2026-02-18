@@ -99,11 +99,11 @@ namespace x86simdsort {
 
 #define DECLARE_INTERNAL_argselect(TYPE) \
     static std::vector<size_t> (*internal_argselect##TYPE)( \
-            TYPE *, size_t, size_t, bool) \
+            const TYPE *, size_t, size_t, bool) \
             = NULL; \
     template <> \
     std::vector<size_t> argselect( \
-            TYPE *arr, size_t k, size_t arrsize, bool hasnan) \
+            const TYPE *arr, size_t k, size_t arrsize, bool hasnan) \
     { \
         return (*internal_argselect##TYPE)(arr, k, arrsize, hasnan); \
     }

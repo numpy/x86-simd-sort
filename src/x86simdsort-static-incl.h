@@ -40,12 +40,12 @@ X86_SIMD_SORT_FINLINE void argsort(const T *arr,
 
 template <typename T>
 X86_SIMD_SORT_FINLINE std::vector<size_t>
-argselect(T *arr, size_t k, size_t size, bool hasnan = false);
+argselect(const T *arr, size_t k, size_t size, bool hasnan = false);
 
 /* argselect API required by NumPy: */
 template <typename T>
-void X86_SIMD_SORT_FINLINE
-argselect(T *arr, size_t *arg, size_t k, size_t size, bool hasnan = false);
+void X86_SIMD_SORT_FINLINE argselect(
+        const T *arr, size_t *arg, size_t k, size_t size, bool hasnan = false);
 
 template <typename T1, typename T2>
 X86_SIMD_SORT_FINLINE void keyvalue_qsort(T1 *key,
@@ -112,13 +112,13 @@ X86_SIMD_SORT_FINLINE void keyvalue_partial_sort(T1 *key,
     } \
     template <typename T> \
     X86_SIMD_SORT_FINLINE void x86simdsortStatic::argselect( \
-            T *arr, size_t *arg, size_t k, size_t size, bool hasnan) \
+            const T *arr, size_t *arg, size_t k, size_t size, bool hasnan) \
     { \
         ISA##_argselect(arr, arg, k, size, hasnan); \
     } \
     template <typename T> \
     X86_SIMD_SORT_FINLINE std::vector<size_t> x86simdsortStatic::argselect( \
-            T *arr, size_t k, size_t size, bool hasnan) \
+            const T *arr, size_t k, size_t size, bool hasnan) \
     { \
         std::vector<size_t> indices(size); \
         std::iota(indices.begin(), indices.end(), 0); \
