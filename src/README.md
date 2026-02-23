@@ -75,7 +75,7 @@ Equivalent to `np.argselect` in
 [NumPy](https://numpy.org/doc/stable/reference/generated/numpy.argpartition.html).
 
 ```cpp
-void x86simdsortStatic::argselect<T>(T* arr, size_t *arg, size_t k, size_t arrsize, bool hasnan = false);
+void x86simdsortStatic::argselect<T>(const T* arr, size_t *arg, size_t k, size_t arrsize, bool hasnan = false);
 ```
 Supported datatypes: `uint32_t`, `int32_t`, `float`, `uint64_t`, `int64_t` and
 `double`.

@@ -57,7 +57,7 @@ data types.
 ## Arg sort routines on arrays
 ```cpp
 std::vector<size_t> arg = x86simdsort::argsort(const T* arr, size_t size, bool hasnan, bool descending);
-std::vector<size_t> arg = x86simdsort::argselect(T* arr, size_t k, size_t size, bool hasnan);
+std::vector<size_t> arg = x86simdsort::argselect(const T* arr, size_t k, size_t size, bool hasnan);
 ```
 Supported datatypes: `T` $\in$ `[_Float16, uint16_t, int16_t, float, uint32_t, int32_t, double,
 uint64_t, int64_t]` Note that argsort and argselect are not accelerated with SIMD when using 16-bit
