@@ -12,7 +12,7 @@
 
 template <typename T>
 X86_SIMD_SORT_INLINE void std_argselect_withnan(
-        T *arr, arrsize_t *arg, arrsize_t k, arrsize_t left, arrsize_t right)
+        const T *arr, arrsize_t *arg, arrsize_t k, arrsize_t left, arrsize_t right)
 {
     std::nth_element(arg + left,
                      arg + k,
@@ -33,7 +33,7 @@ X86_SIMD_SORT_INLINE void std_argselect_withnan(
 /* argsort using std::sort */
 template <typename T>
 X86_SIMD_SORT_INLINE void
-std_argsort_withnan(T *arr, arrsize_t *arg, arrsize_t left, arrsize_t right)
+std_argsort_withnan(const T *arr, arrsize_t *arg, arrsize_t left, arrsize_t right)
 {
     std::sort(arg + left,
               arg + right,
@@ -53,7 +53,7 @@ std_argsort_withnan(T *arr, arrsize_t *arg, arrsize_t left, arrsize_t right)
 /* argsort using std::sort */
 template <typename T>
 X86_SIMD_SORT_INLINE void
-std_argsort(T *arr, arrsize_t *arg, arrsize_t left, arrsize_t right)
+std_argsort(const T *arr, arrsize_t *arg, arrsize_t left, arrsize_t right)
 {
     std::sort(arg + left,
               arg + right,
@@ -172,7 +172,7 @@ X86_SIMD_SORT_INLINE int32_t partition_vec(type_t *arg,
  * last element that is less than equal to the pivot.
  */
 template <typename vtype, typename argtype, typename type_t>
-X86_SIMD_SORT_INLINE arrsize_t argpartition(type_t *arr,
+X86_SIMD_SORT_INLINE arrsize_t argpartition(const type_t *arr,
                                             arrsize_t *arg,
                                             arrsize_t left,
                                             arrsize_t right,
@@ -291,7 +291,7 @@ template <typename vtype,
           typename argtype,
           int num_unroll,
           typename type_t = typename vtype::type_t>
-X86_SIMD_SORT_INLINE arrsize_t argpartition_unrolled(type_t *arr,
+X86_SIMD_SORT_INLINE arrsize_t argpartition_unrolled(const type_t *arr,
                                                      arrsize_t *arg,
                                                      arrsize_t left,
                                                      arrsize_t right,
@@ -422,7 +422,7 @@ X86_SIMD_SORT_INLINE arrsize_t argpartition_unrolled(type_t *arr,
 }
 
 template <typename vtype, typename type_t>
-X86_SIMD_SORT_INLINE type_t get_pivot_64bit(type_t *arr,
+X86_SIMD_SORT_INLINE type_t get_pivot_64bit(const type_t *arr,
                                             arrsize_t *arg,
                                             const arrsize_t left,
                                             const arrsize_t right)
@@ -468,7 +468,7 @@ X86_SIMD_SORT_INLINE type_t get_pivot_64bit(type_t *arr,
 }
 
 template <typename vtype, typename argtype, typename type_t>
-X86_SIMD_SORT_INLINE void argsort_(type_t *arr,
+X86_SIMD_SORT_INLINE void argsort_(const type_t *arr,
                                    arrsize_t *arg,
                                    arrsize_t left,
                                    arrsize_t right,
@@ -549,7 +549,7 @@ X86_SIMD_SORT_INLINE void argsort_(type_t *arr,
 }
 
 template <typename vtype, typename argtype, typename type_t>
-X86_SIMD_SORT_INLINE void argselect_(type_t *arr,
+X86_SIMD_SORT_INLINE void argselect_(const type_t *arr,
                                      arrsize_t *arg,
                                      arrsize_t pos,
                                      arrsize_t left,
@@ -590,7 +590,7 @@ template <typename T,
           typename full_vector,
           template <typename...>
           typename half_vector>
-X86_SIMD_SORT_INLINE void xss_argsort(T *arr,
+X86_SIMD_SORT_INLINE void xss_argsort(const T *arr,
                                       arrsize_t *arg,
                                       arrsize_t arrsize,
                                       bool hasnan = false,
@@ -669,29 +669,24 @@ X86_SIMD_SORT_INLINE void xss_argsort(T *arr,
 }
 
 template <typename T>
-X86_SIMD_SORT_INLINE void avx512_argsort(T *arr,
+X86_SIMD_SORT_INLINE void avx512_argsort(const T *arr,
                                          arrsize_t *arg,
                                          arrsize_t arrsize,
                                          bool hasnan = false,
                                          bool descending = false)
 {
-    // Safe: argsort never mutates arr; const is dropped only for SIMD type instantiation
-    using base_t = std::remove_const_t<T>;
-    xss_argsort<base_t, zmm_vector, ymm_vector>(
-            const_cast<base_t *>(arr), arg, arrsize, hasnan, descending);
+    xss_argsort<T, zmm_vector, ymm_vector>(arr, arg, arrsize, hasnan, descending);
 }
 
 template <typename T>
-X86_SIMD_SORT_INLINE void avx2_argsort(T *arr,
+X86_SIMD_SORT_INLINE void avx2_argsort(const T *arr,
                                        arrsize_t *arg,
                                        arrsize_t arrsize,
                                        bool hasnan = false,
                                        bool descending = false)
 {
-    // Safe: argsort never mutates arr; const is dropped only for SIMD type instantiation
-    using base_t = std::remove_const_t<T>;
-    xss_argsort<base_t, avx2_vector, avx2_half_vector>(
-            const_cast<base_t *>(arr), arg, arrsize, hasnan, descending);
+    xss_argsort<T, avx2_vector, avx2_half_vector>(
+            arr, arg, arrsize, hasnan, descending);
 }
 
 /* argselect methods for 32-bit and 64-bit dtypes */
@@ -700,7 +695,7 @@ template <typename T,
           typename full_vector,
           template <typename...>
           typename half_vector>
-X86_SIMD_SORT_INLINE void xss_argselect(T *arr,
+X86_SIMD_SORT_INLINE void xss_argselect(const T *arr,
                                         arrsize_t *arg,
                                         arrsize_t k,
                                         arrsize_t arrsize,
@@ -735,29 +730,23 @@ X86_SIMD_SORT_INLINE void xss_argselect(T *arr,
 }
 
 template <typename T>
-X86_SIMD_SORT_INLINE void avx512_argselect(T *arr,
+X86_SIMD_SORT_INLINE void avx512_argselect(const T *arr,
                                            arrsize_t *arg,
                                            arrsize_t k,
                                            arrsize_t arrsize,
                                            bool hasnan = false)
 {
-    // Safe: argselect never mutates arr; const is dropped only for SIMD type instantiation
-    using base_t = std::remove_const_t<T>;
-    xss_argselect<base_t, zmm_vector, ymm_vector>(
-            const_cast<base_t *>(arr), arg, k, arrsize, hasnan);
+    xss_argselect<T, zmm_vector, ymm_vector>(arr, arg, k, arrsize, hasnan);
 }
 
 template <typename T>
-X86_SIMD_SORT_INLINE void avx2_argselect(T *arr,
+X86_SIMD_SORT_INLINE void avx2_argselect(const T *arr,
                                          arrsize_t *arg,
                                          arrsize_t k,
                                          arrsize_t arrsize,
                                          bool hasnan = false)
 {
-    // Safe: argselect never mutates arr; const is dropped only for SIMD type instantiation
-    using base_t = std::remove_const_t<T>;
-    xss_argselect<base_t, avx2_vector, avx2_half_vector>(
-            const_cast<base_t *>(arr), arg, k, arrsize, hasnan);
+    xss_argselect<T, avx2_vector, avx2_half_vector>(arr, arg, k, arrsize, hasnan);
 }
 
 #endif // XSS_COMMON_ARGSORT

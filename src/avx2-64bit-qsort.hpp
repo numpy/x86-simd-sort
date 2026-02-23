@@ -99,7 +99,7 @@ struct avx2_vector<int64_t> {
         return _mm256_mask_i32gather_epi64(
                 src, (const long long int *)base, index, mask, scale);
     }
-    static reg_t i64gather(type_t *arr, arrsize_t *ind)
+    static reg_t i64gather(const type_t *arr, arrsize_t *ind)
     {
         return set(arr[ind[3]], arr[ind[2]], arr[ind[1]], arr[ind[0]]);
     }
@@ -269,7 +269,7 @@ struct avx2_vector<uint64_t> {
         return _mm256_mask_i32gather_epi64(
                 src, (const long long int *)base, index, mask, scale);
     }
-    static reg_t i64gather(type_t *arr, arrsize_t *ind)
+    static reg_t i64gather(const type_t *arr, arrsize_t *ind)
     {
         return set(arr[ind[3]], arr[ind[2]], arr[ind[1]], arr[ind[0]]);
     }
@@ -499,7 +499,7 @@ struct avx2_vector<double> {
                                         scale);
         ;
     }
-    static reg_t i64gather(type_t *arr, arrsize_t *ind)
+    static reg_t i64gather(const type_t *arr, arrsize_t *ind)
     {
         return set(arr[ind[3]], arr[ind[2]], arr[ind[1]], arr[ind[0]]);
     }
