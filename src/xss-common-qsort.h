@@ -79,7 +79,7 @@ X86_SIMD_SORT_INLINE arrsize_t replace_nan_with_inf(T *arr, arrsize_t size)
 }
 
 template <typename vtype, typename type_t>
-X86_SIMD_SORT_INLINE bool array_has_nan(type_t *arr, arrsize_t size)
+X86_SIMD_SORT_INLINE bool array_has_nan(const type_t *arr, arrsize_t size)
 {
     using opmask_t = typename vtype::opmask_t;
     using reg_t = typename vtype::reg_t;
