@@ -11,8 +11,11 @@
 #include <numeric>
 
 template <typename T>
-X86_SIMD_SORT_INLINE void std_argselect_withnan(
-        const T *arr, arrsize_t *arg, arrsize_t k, arrsize_t left, arrsize_t right)
+X86_SIMD_SORT_INLINE void std_argselect_withnan(const T *arr,
+                                                arrsize_t *arg,
+                                                arrsize_t k,
+                                                arrsize_t left,
+                                                arrsize_t right)
 {
     std::nth_element(arg + left,
                      arg + k,
@@ -32,8 +35,10 @@ X86_SIMD_SORT_INLINE void std_argselect_withnan(
 
 /* argsort using std::sort */
 template <typename T>
-X86_SIMD_SORT_INLINE void
-std_argsort_withnan(const T *arr, arrsize_t *arg, arrsize_t left, arrsize_t right)
+X86_SIMD_SORT_INLINE void std_argsort_withnan(const T *arr,
+                                              arrsize_t *arg,
+                                              arrsize_t left,
+                                              arrsize_t right)
 {
     std::sort(arg + left,
               arg + right,
@@ -675,7 +680,8 @@ X86_SIMD_SORT_INLINE void avx512_argsort(const T *arr,
                                          bool hasnan = false,
                                          bool descending = false)
 {
-    xss_argsort<T, zmm_vector, ymm_vector>(arr, arg, arrsize, hasnan, descending);
+    xss_argsort<T, zmm_vector, ymm_vector>(
+            arr, arg, arrsize, hasnan, descending);
 }
 
 template <typename T>
@@ -746,7 +752,8 @@ X86_SIMD_SORT_INLINE void avx2_argselect(const T *arr,
                                          arrsize_t arrsize,
                                          bool hasnan = false)
 {
-    xss_argselect<T, avx2_vector, avx2_half_vector>(arr, arg, k, arrsize, hasnan);
+    xss_argselect<T, avx2_vector, avx2_half_vector>(
+            arr, arg, k, arrsize, hasnan);
 }
 
 #endif // XSS_COMMON_ARGSORT
