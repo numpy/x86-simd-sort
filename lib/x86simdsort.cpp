@@ -140,11 +140,11 @@ namespace x86simdsort {
 #define DECLARE_INTERNAL_argsort(TYPE) \
     static void CAT(resolve_argsort, TYPE)(void); \
     static std::vector<size_t> (*internal_argsort##TYPE)( \
-            TYPE *, size_t, bool, bool) \
+            const TYPE *, size_t, bool, bool) \
             = NULL; \
     template <> \
     std::vector<size_t> XSS_EXPORT_SYMBOL argsort( \
-            TYPE *arr, size_t arrsize, bool hasnan, bool descending) \
+            const TYPE *arr, size_t arrsize, bool hasnan, bool descending) \
     { \
         if (internal_argsort##TYPE == NULL) { CAT(resolve_argsort, TYPE)(); } \
         return (*internal_argsort##TYPE)(arr, arrsize, hasnan, descending); \
@@ -153,11 +153,11 @@ namespace x86simdsort {
 #define DECLARE_INTERNAL_argselect(TYPE) \
     static void CAT(resolve_argselect, TYPE)(void); \
     static std::vector<size_t> (*internal_argselect##TYPE)( \
-            TYPE *, size_t, size_t, bool) \
+            const TYPE *, size_t, size_t, bool) \
             = NULL; \
     template <> \
     std::vector<size_t> XSS_EXPORT_SYMBOL argselect( \
-            TYPE *arr, size_t k, size_t arrsize, bool hasnan) \
+            const TYPE *arr, size_t k, size_t arrsize, bool hasnan) \
     { \
         if (internal_argselect##TYPE == NULL) { \
             CAT(resolve_argselect, TYPE)(); \
@@ -203,7 +203,7 @@ namespace x86simdsort {
             = NULL; \
     template <> \
     std::vector<size_t> XSS_EXPORT_SYMBOL argsort( \
-            TYPE *arr, size_t arrsize, bool hasnan, bool descending) \
+            const TYPE *arr, size_t arrsize, bool hasnan, bool descending) \
     { \
         return (*internal_argsort##TYPE)(arr, arrsize, hasnan, descending); \
     }
@@ -214,7 +214,7 @@ namespace x86simdsort {
             = NULL; \
     template <> \
     std::vector<size_t> XSS_EXPORT_SYMBOL argselect( \
-            TYPE *arr, size_t k, size_t arrsize, bool hasnan) \
+            const TYPE *arr, size_t k, size_t arrsize, bool hasnan) \
     { \
         return (*internal_argselect##TYPE)(arr, k, arrsize, hasnan); \
     }
