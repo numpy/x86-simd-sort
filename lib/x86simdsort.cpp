@@ -170,7 +170,8 @@ namespace x86simdsort {
 #define DECLARE_INTERNAL_qsort(TYPE) \
     static void (*internal_qsort##TYPE)(TYPE *, size_t, bool, bool) = NULL; \
     template <> \
-    void XSS_EXPORT_SYMBOL qsort(TYPE *arr, size_t arrsize, bool hasnan, bool descending) \
+    void XSS_EXPORT_SYMBOL qsort( \
+            TYPE *arr, size_t arrsize, bool hasnan, bool descending) \
     { \
         (*internal_qsort##TYPE)(arr, arrsize, hasnan, descending); \
     }
@@ -371,38 +372,37 @@ DISPATCH_ALL(argselect,
             = NULL; \
     template <> \
     void XSS_EXPORT_SYMBOL keyvalue_qsort(TYPE1 *key, \
-                        TYPE2 *val, \
-                        size_t arrsize, \
-                        bool hasnan, \
-                        bool descending) \
+                                          TYPE2 *val, \
+                                          size_t arrsize, \
+                                          bool hasnan, \
+                                          bool descending) \
     { \
         (CAT(CAT(*internal_keyvalue_qsort_, TYPE1), TYPE2))( \
                 key, val, arrsize, hasnan, descending); \
     } \
     template <> \
     void XSS_EXPORT_SYMBOL keyvalue_select(TYPE1 *key, \
-                         TYPE2 *val, \
-                         size_t k, \
-                         size_t arrsize, \
-                         bool hasnan, \
-                         bool descending) \
+                                           TYPE2 *val, \
+                                           size_t k, \
+                                           size_t arrsize, \
+                                           bool hasnan, \
+                                           bool descending) \
     { \
         (CAT(CAT(*internal_keyvalue_select_, TYPE1), TYPE2))( \
                 key, val, k, arrsize, hasnan, descending); \
     } \
     template <> \
     void XSS_EXPORT_SYMBOL keyvalue_partial_sort(TYPE1 *key, \
-                               TYPE2 *val, \
-                               size_t k, \
-                               size_t arrsize, \
-                               bool hasnan, \
-                               bool descending) \
+                                                 TYPE2 *val, \
+                                                 size_t k, \
+                                                 size_t arrsize, \
+                                                 bool hasnan, \
+                                                 bool descending) \
     { \
         (CAT(CAT(*internal_keyvalue_partial_sort_, TYPE1), TYPE2))( \
                 key, val, k, arrsize, hasnan, descending); \
     }
 #endif // _MSC_VER
-
 
 #define DISPATCH_KEYVALUE_SORT(TYPE1, TYPE2, ISA) \
     DECLARE_ALL_KEYVALUE_METHODS(TYPE1, TYPE2) \
