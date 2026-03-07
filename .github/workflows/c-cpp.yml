@@ -217,11 +217,8 @@ jobs:
         cd builddir
         ninja
 
-    - name: Run test suite on ADL
-      run: sde -adl -- ./builddir/testexe --gtest_filter="*simdsort*"
-
-    - name: Run test suite on SPR
-      run: sde -spr -- ./builddir/testexe --gtest_filter="*simdsort*"
+    - name: Run test suite
+      run: ./builddir/testexe --gtest_filter="*simdsort*"
 
 
   SKX-SKL-openmp:

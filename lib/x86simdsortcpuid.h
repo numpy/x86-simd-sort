@@ -31,7 +31,7 @@ static bool os_supports_avx512()
     return (xcr0 & 0xE0) == 0xE0;
 }
 
-void xss_cpu_init()
+static void xss_cpu_init()
 {
     int cpuInfo[4];
     __cpuid(cpuInfo, 0);
