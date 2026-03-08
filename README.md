@@ -82,6 +82,16 @@ benchmark](https://github.com/google/benchmark) (>= v1.9.2) frameworks
 respectively. You can configure meson to build them both by using
 `-Dbuild_tests=true` and `-Dbuild_benchmarks=true`.
 
+## Supported Compilers
+
+This library requires a **C++17** compatible compiler. While most modern compilers work, specific versions are required to support advanced SIMD instruction sets like AVX-512 and AVX-512FP16: 
+
+* **GCC**: Version **8.x** or higher is required for general builds.
+    * *Note: To support `_Float16` (AVX-512FP16), **GCC 12** or higher is mandatory.*
+* **Clang**: Version **8.0** or higher is generally recommended for robust AVX-512 support.
+* **MSVC**: **Visual Studio 2019 (version 16.8)** or newer is required for C++17 and initial AVX-512 intrinsic support.
+* **Intel C++ Compiler (icx)**: All modern versions of the LLVM-based Intel compiler are fully supported and often provide optimal performance for these routines.
+
 ## Build using OpenMP
 
 `qsort`, `argsort`, and `keyvalue_qsort` can achieve even greater performance
