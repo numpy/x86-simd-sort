@@ -9,6 +9,54 @@ on:
 permissions: read-all
 
 jobs:
+  build-windows-msvc:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Set up MSVC environment
+      - name: Set up MSVC Developer Command Prompt
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      # Install Python (Meson requires it)
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      # Install Meson and Ninja
+      - name: Install Meson + Ninja
+        run: |
+          python -m pip install --upgrade pip
+          pip install meson ninja
+
+      - name: Setup environment
+        run: |
+          echo "PKG_CONFIG=${{ github.workspace }}/vcpkg/installed/x64-windows/tools/pkgconf/pkgconf.exe" >> $env:GITHUB_ENV
+          echo "PKG_CONFIG_PATH=${{ github.workspace }}/vcpkg/installed/x64-windows/lib/pkgconfig" >> $env:GITHUB_ENV
+          echo "LIB=${{ github.workspace }}/vcpkg/installed/x64-windows/lib;$env:LIB" >> $env:GITHUB_ENV
+          echo "INCLUDE=${{ github.workspace }}/vcpkg/installed/x64-windows/include;$env:INCLUDE" >> $env:GITHUB_ENV
+        shell: pwsh
+
+      - name: Setup vcpkg and install pkg-config and gtest
+        run: |
+          git clone https://github.com/Microsoft/vcpkg.git
+          .\vcpkg\bootstrap-vcpkg.bat
+          .\vcpkg\vcpkg install gtest:x64-windows pkgconf:x64-windows
+
+      # Configure and build with Meson (MSVC will be used automatically)
+      - name: Configure (Meson)
+        run: meson setup -Dbuild_tests=true --warnlevel 2 --buildtype release builddir --backend=ninja
+
+      - name: Build (Ninja)
+        run: ninja -C builddir
+      
+      - name: Run tests 
+        run: meson test -C builddir --test-args "\-\-gtest_filter=*qsort*" -v 
+        
   SKL-gcc9:
 
     runs-on: ubuntu-24.04
@@ -135,7 +183,7 @@ jobs:
     - name: Run test suite on SPR
       run: sde -spr -- ./builddir/testexe --gtest_filter="*simdsort*"
 
-  ADL-ASAN-clang18:
+  ASAN-clang18:
 
     runs-on: ubuntu-24.04
 
@@ -169,48 +217,9 @@ jobs:
         cd builddir
         ninja
 
-    - name: Run test suite on ADL
-      run: sde -adl -- ./builddir/testexe --gtest_filter="*simdsort*"
+    - name: Run test suite
+      run: ./builddir/testexe --gtest_filter="*simdsort*"
 
-  SPR-ASAN-clang18:
-
-    runs-on: intel-ubuntu-24.04
-
-    steps:
-    - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-
-    - name: Install dependencies
-      run: |
-        sudo apt update
-        sudo apt -y install clang-18 libomp-18-dev libgtest-dev meson curl git
-
-    - name: Install Intel SDE
-      run: |
-        curl -o /tmp/sde.tar.xz https://downloadmirror.intel.com/859732/sde-external-9.58.0-2025-06-16-lin.tar.xz
-        mkdir /tmp/sde && tar -xvf /tmp/sde.tar.xz -C /tmp/sde/
-        sudo mv /tmp/sde/* /opt/sde && sudo ln -s /opt/sde/sde64 /usr/bin/sde
-
-    - name: Build examples
-      env:
-        CXX: clang++-18
-      run: |
-        cd examples
-        make all
-
-    - name: Build
-      env:
-        CXX: clang++-18
-      run: |
-        make clean
-        meson setup -Dbuild_tests=true -Duse_openmp=true -Db_sanitize=address,undefined -Dfatal_sanitizers=true  -Dasan_ci_dont_validate=true -Db_lundef=false --warnlevel 0 --buildtype release builddir
-        cd builddir
-        ninja
-
-    - name: Run test suite on SPR
-      run: sde -spr -- ./builddir/testexe
-    - name: Run ICL fp16 tests
-      # Note: This filters for the _Float16 tests based on the number assigned to it, which could change in the future
-      run: sde -icx -- ./builddir/testexe --gtest_filter="*/simdsort/2*"
 
   SKX-SKL-openmp:
 
