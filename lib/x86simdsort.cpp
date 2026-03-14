@@ -3,11 +3,16 @@
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <windows.h>
-static void (*xss_init_funcs[512])();
+#define XSS_MAX_INIT_FUNCS 512
+static void (*xss_init_funcs[XSS_MAX_INIT_FUNCS])();
 static int xss_init_count = 0;
 #define XSS_POST_RESOLVE(resolve_func_name) \
     static int CAT(xss_reg_, resolve_func_name) \
-            = (xss_init_funcs[xss_init_count++] = &resolve_func_name, 0);
+            = (xss_init_funcs[xss_init_count < XSS_MAX_INIT_FUNCS \
+                                      ? xss_init_count++ \
+                                      : xss_init_count] \
+                       = &resolve_func_name, \
+               0);
 #else
 #define XSS_ATTRIBUTE_CONSTRUCTOR __attribute__((constructor))
 #define XSS_POST_RESOLVE(resolve_func_name)
