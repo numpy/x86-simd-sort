@@ -1,7 +1,16 @@
 #if defined(_MSC_VER)
 #define XSS_ATTRIBUTE_CONSTRUCTOR
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <windows.h>
+static void (*xss_init_funcs[512])();
+static int xss_init_count = 0;
+#define XSS_POST_RESOLVE(resolve_func_name) \
+    static int CAT(xss_reg_, resolve_func_name) \
+            = (xss_init_funcs[xss_init_count++] = &resolve_func_name, 0);
 #else
 #define XSS_ATTRIBUTE_CONSTRUCTOR __attribute__((constructor))
+#define XSS_POST_RESOLVE(resolve_func_name)
 #endif
 #include "x86simdsort.h"
 #include "x86simdsort-internal.h"
@@ -96,76 +105,8 @@ namespace x86simdsort {
                 return; \
             } \
         } \
-    }
-
-#ifdef _MSC_VER
-#define DECLARE_INTERNAL_qsort(TYPE) \
-    static void CAT(resolve_qsort, TYPE)(void); \
-    static void (*internal_qsort##TYPE)(TYPE *, size_t, bool, bool) = NULL; \
-    template <> \
-    void XSS_EXPORT_SYMBOL qsort( \
-            TYPE *arr, size_t arrsize, bool hasnan, bool descending) \
-    { \
-        if (internal_qsort##TYPE == NULL) { CAT(resolve_qsort, TYPE)(); } \
-        (*internal_qsort##TYPE)(arr, arrsize, hasnan, descending); \
-    }
-
-#define DECLARE_INTERNAL_qselect(TYPE) \
-    static void CAT(resolve_qselect, TYPE)(void); \
-    static void (*internal_qselect##TYPE)(TYPE *, size_t, size_t, bool, bool) \
-            = NULL; \
-    template <> \
-    void XSS_EXPORT_SYMBOL qselect( \
-            TYPE *arr, size_t k, size_t arrsize, bool hasnan, bool descending) \
-    { \
-        if (internal_qselect##TYPE == NULL) { CAT(resolve_qselect, TYPE)(); } \
-        (*internal_qselect##TYPE)(arr, k, arrsize, hasnan, descending); \
-    }
-
-#define DECLARE_INTERNAL_partial_qsort(TYPE) \
-    static void CAT(resolve_partial_qsort, TYPE)(void); \
-    static void (*internal_partial_qsort##TYPE)( \
-            TYPE *, size_t, size_t, bool, bool) \
-            = NULL; \
-    template <> \
-    void XSS_EXPORT_SYMBOL partial_qsort( \
-            TYPE *arr, size_t k, size_t arrsize, bool hasnan, bool descending) \
-    { \
-        if (internal_partial_qsort##TYPE == NULL) { \
-            CAT(resolve_partial_qsort, TYPE)(); \
-        } \
-        (*internal_partial_qsort##TYPE)(arr, k, arrsize, hasnan, descending); \
-    }
-
-#define DECLARE_INTERNAL_argsort(TYPE) \
-    static void CAT(resolve_argsort, TYPE)(void); \
-    static std::vector<size_t> (*internal_argsort##TYPE)( \
-            const TYPE *, size_t, bool, bool) \
-            = NULL; \
-    template <> \
-    std::vector<size_t> XSS_EXPORT_SYMBOL argsort( \
-            const TYPE *arr, size_t arrsize, bool hasnan, bool descending) \
-    { \
-        if (internal_argsort##TYPE == NULL) { CAT(resolve_argsort, TYPE)(); } \
-        return (*internal_argsort##TYPE)(arr, arrsize, hasnan, descending); \
-    }
-
-#define DECLARE_INTERNAL_argselect(TYPE) \
-    static void CAT(resolve_argselect, TYPE)(void); \
-    static std::vector<size_t> (*internal_argselect##TYPE)( \
-            const TYPE *, size_t, size_t, bool) \
-            = NULL; \
-    template <> \
-    std::vector<size_t> XSS_EXPORT_SYMBOL argselect( \
-            const TYPE *arr, size_t k, size_t arrsize, bool hasnan) \
-    { \
-        if (internal_argselect##TYPE == NULL) { \
-            CAT(resolve_argselect, TYPE)(); \
-        } \
-        return (*internal_argselect##TYPE)(arr, k, arrsize, hasnan); \
-    }
-
-#else
+    } \
+    XSS_POST_RESOLVE(CAT(CAT(resolve_, func), TYPE))
 
 #define DECLARE_INTERNAL_qsort(TYPE) \
     static void (*internal_qsort##TYPE)(TYPE *, size_t, bool, bool) = NULL; \
@@ -218,8 +159,6 @@ namespace x86simdsort {
     { \
         return (*internal_argselect##TYPE)(arr, k, arrsize, hasnan); \
     }
-
-#endif // _MSC_VER
 
 /* simple constexpr function as a way around having #ifdef __FLT16_MAX__ block
  * within the DISPATCH macro */
@@ -301,65 +240,10 @@ DISPATCH_ALL(argselect,
                 return; \
             } \
         } \
-    }
+    } \
+    XSS_POST_RESOLVE( \
+            CAT(CAT(CAT(CAT(resolve_, func), _), TYPE1), TYPE2))
 
-#ifdef _MSC_VER
-#define DECLARE_ALL_KEYVALUE_METHODS(TYPE1, TYPE2) \
-    static void CAT(CAT(resolve_keyvalue_select_, TYPE1), TYPE2)(void); \
-    static void CAT(CAT(resolve_keyvalue_partial_sort_, TYPE1), TYPE2)(void); \
-    static void CAT(CAT(resolve_keyvalue_qsort_, TYPE1), TYPE2)(void); \
-    static void(CAT(CAT(*internal_keyvalue_qsort_, TYPE1), TYPE2))( \
-            TYPE1 *, TYPE2 *, size_t, bool, bool) \
-            = NULL; \
-    static void(CAT(CAT(*internal_keyvalue_select_, TYPE1), TYPE2))( \
-            TYPE1 *, TYPE2 *, size_t, size_t, bool, bool) \
-            = NULL; \
-    static void(CAT(CAT(*internal_keyvalue_partial_sort_, TYPE1), TYPE2))( \
-            TYPE1 *, TYPE2 *, size_t, size_t, bool, bool) \
-            = NULL; \
-    template <> \
-    void XSS_EXPORT_SYMBOL keyvalue_qsort(TYPE1 *key, \
-                                          TYPE2 *val, \
-                                          size_t arrsize, \
-                                          bool hasnan, \
-                                          bool descending) \
-    { \
-        if ((CAT(CAT(*internal_keyvalue_qsort_, TYPE1), TYPE2)) == NULL) { \
-            CAT(CAT(resolve_keyvalue_qsort_, TYPE1), TYPE2)(); \
-        } \
-        (CAT(CAT(*internal_keyvalue_qsort_, TYPE1), TYPE2))( \
-                key, val, arrsize, hasnan, descending); \
-    } \
-    template <> \
-    void XSS_EXPORT_SYMBOL keyvalue_select(TYPE1 *key, \
-                                           TYPE2 *val, \
-                                           size_t k, \
-                                           size_t arrsize, \
-                                           bool hasnan, \
-                                           bool descending) \
-    { \
-        if ((CAT(CAT(*internal_keyvalue_select_, TYPE1), TYPE2)) == NULL) { \
-            CAT(CAT(resolve_keyvalue_select_, TYPE1), TYPE2)(); \
-        } \
-        (CAT(CAT(*internal_keyvalue_select_, TYPE1), TYPE2))( \
-                key, val, k, arrsize, hasnan, descending); \
-    } \
-    template <> \
-    void XSS_EXPORT_SYMBOL keyvalue_partial_sort(TYPE1 *key, \
-                                                 TYPE2 *val, \
-                                                 size_t k, \
-                                                 size_t arrsize, \
-                                                 bool hasnan, \
-                                                 bool descending) \
-    { \
-        if ((CAT(CAT(*internal_keyvalue_partial_sort_, TYPE1), TYPE2)) \
-            == NULL) { \
-            CAT(CAT(resolve_keyvalue_partial_sort_, TYPE1), TYPE2)(); \
-        } \
-        (CAT(CAT(*internal_keyvalue_partial_sort_, TYPE1), TYPE2))( \
-                key, val, k, arrsize, hasnan, descending); \
-    }
-#else
 #define DECLARE_ALL_KEYVALUE_METHODS(TYPE1, TYPE2) \
     static void(CAT(CAT(*internal_keyvalue_qsort_, TYPE1), TYPE2))( \
             TYPE1 *, TYPE2 *, size_t, bool, bool) \
@@ -402,7 +286,6 @@ DISPATCH_ALL(argselect,
         (CAT(CAT(*internal_keyvalue_partial_sort_, TYPE1), TYPE2))( \
                 key, val, k, arrsize, hasnan, descending); \
     }
-#endif // _MSC_VER
 
 #define DISPATCH_KEYVALUE_SORT(TYPE1, TYPE2, ISA) \
     DECLARE_ALL_KEYVALUE_METHODS(TYPE1, TYPE2) \
@@ -470,3 +353,17 @@ void keyvalue_qsort_uint32_uint64(uint32_t *key, uint64_t *val, size_t size)
     x86simdsort::keyvalue_qsort(key, val, size, true);
 }
 }
+
+#ifdef _MSC_VER
+extern "C" BOOL WINAPI DllMain(HINSTANCE hinstDLL,
+                               DWORD fdwReason,
+                               LPVOID lpReserved)
+{
+    if (fdwReason == DLL_PROCESS_ATTACH) {
+        for (int i = 0; i < xss_init_count; i++) {
+            xss_init_funcs[i]();
+        }
+    }
+    return TRUE;
+}
+#endif
