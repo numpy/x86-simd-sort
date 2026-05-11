@@ -37,9 +37,9 @@ how fast this is relative to `std::sort`.
 
 ## Sort an array of built-in integers and floats
 ```cpp
-void x86simdsort::qsort(T* arr, size_t size, bool hasnan, bool descending);
-void x86simdsort::qselect(T* arr, size_t k, size_t size, bool hasnan, bool descending);
-void x86simdsort::partial_qsort(T* arr, size_t k, size_t size, bool hasnan, bool descending);
+void x86simdsort::qsort(T* arr, size_t size, bool hasnan, bool descending, bool trailing_nans);
+void x86simdsort::qselect(T* arr, size_t k, size_t size, bool hasnan, bool descending, bool trailing_nans);
+void x86simdsort::partial_qsort(T* arr, size_t k, size_t size, bool hasnan, bool descending, bool trailing_nans);
 ```
 Supported datatypes: `T` $\in$ `[_Float16, uint16_t, int16_t, float, uint32_t,
 int32_t, double, uint64_t, int64_t]`
@@ -56,8 +56,8 @@ data types.
 
 ## Arg sort routines on arrays
 ```cpp
-std::vector<size_t> arg = x86simdsort::argsort(const T* arr, size_t size, bool hasnan, bool descending);
-std::vector<size_t> arg = x86simdsort::argselect(const T* arr, size_t k, size_t size, bool hasnan);
+std::vector<size_t> arg = x86simdsort::argsort(const T* arr, size_t size, bool hasnan, bool descending, bool trailing_nans);
+std::vector<size_t> arg = x86simdsort::argselect(const T* arr, size_t k, size_t size, bool hasnan, bool trailing_nans);
 ```
 Supported datatypes: `T` $\in$ `[_Float16, uint16_t, int16_t, float, uint32_t, int32_t, double,
 uint64_t, int64_t]` Note that argsort and argselect are not accelerated with SIMD when using 16-bit
@@ -174,13 +174,19 @@ Supported datatypes: `uint16_t, int16_t, _Float16, uint32_t, int32_t, float,
 uint64_t, int64_t, double`. Note that `_Float16` will require building this
 library with g++ >= 12.x. All the functions have an optional argument `bool
 hasnan` set to `false` by default (these are relevant to floating point data
-types only).  If your array has NAN's, the the behaviour of the sorting routine
-is undefined. If `hasnan` is set to true, NAN's are always sorted to the end of
-the array. In addition to that, qsort will replace all your NAN's with
-`std::numeric_limits<T>::quiet_NaN`. The original bit-exact NaNs in
-the input are not preserved. Also note that the arg methods (argsort and
-argselect) will not use the SIMD based algorithms if they detect NAN's in the
-array. You can read details of all the implementations
+types only).  If your array has NaN values, the behaviour of the sorting routine
+is undefined unless `hasnan` is set to `true`. When `hasnan=true`, NaN placement
+is controlled by the optional `bool trailing_nans` parameter (default `true`):
+
+- `trailing_nans=true` (default): NaN values are placed at the **end** of the
+  result, regardless of sort direction.
+- `trailing_nans=false`: NaN values are placed at the **beginning** of the
+  result, regardless of sort direction.
+
+Note that `qsort` will replace all NaN values with `std::numeric_limits<T>::quiet_NaN`;
+the original bit-exact NaN payload is not preserved. Also note that the arg
+methods (argsort and argselect) will not use the SIMD based algorithms if they
+detect NaN values in the array. You can read details of all the implementations
 [here](https://github.com/intel/x86-simd-sort/blob/main/src/README.md).
 
 ## Performance comparison on AVX-512: `object_qsort` v/s `std::sort`

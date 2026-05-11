@@ -60,19 +60,24 @@ void IS_ARR_PARTITIONED(std::vector<T> arr,
     cmp_eq = compare<T, std::equal_to<T>>();
 
     if (!descending) {
-        cmp_less = compare<T, std::less<T>>();
-        cmp_leq = compare<T, std::less_equal<T>>();
-        cmp_geq = compare<T, std::greater_equal<T>>();
+        cmp_less = compare_nan_end<T, std::less<T>>();
+        cmp_leq = compare_nan_end<T, std::less_equal<T>>();
+        cmp_geq = compare_nan_end<T, std::greater_equal<T>>();
     }
     else {
-        cmp_less = compare<T, std::greater<T>>();
-        cmp_leq = compare<T, std::greater_equal<T>>();
-        cmp_geq = compare<T, std::less_equal<T>>();
+        cmp_less = compare_nan_end<T, std::greater<T>>();
+        cmp_leq = compare_nan_end<T, std::greater_equal<T>>();
+        cmp_geq = compare_nan_end<T, std::less_equal<T>>();
     }
 
     // 1) arr[k] == sorted[k]; use memcmp to handle nan
     if (!cmp_eq(arr[k], true_kth)) {
         REPORT_FAIL("kth element is incorrect", arr.size(), type, k);
+    }
+    // If arr[k] is NaN, k is in the trailing NaN block; value comparisons are
+    // not meaningful, so skip the left/right partition checks.
+    if constexpr (xss::fp::is_floating_point_v<T>) {
+        if (xss::fp::isnan(arr[k])) return;
     }
     // ( 2) Elements to the left of k should be atmost arr[k]
     if (k >= 1) {

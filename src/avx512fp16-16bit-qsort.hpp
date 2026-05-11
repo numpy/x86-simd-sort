@@ -179,21 +179,27 @@ template <>
 X86_SIMD_SORT_INLINE_ONLY void replace_inf_with_nan(_Float16 *arr,
                                                     arrsize_t size,
                                                     arrsize_t nan_count,
-                                                    bool descending)
+                                                    bool descending,
+                                                    bool trailing_nans)
 {
+    if (nan_count == 0) return;
     Fp16Bits val;
     val.i_ = 0x7c01;
 
-    if (descending) {
-        for (arrsize_t ii = 0; nan_count > 0; ++ii) {
+    if (descending && trailing_nans) {
+        std::rotate(arr, arr + nan_count, arr + size);
+    }
+    else if (!descending && !trailing_nans) {
+        std::rotate(arr, arr + (size - nan_count), arr + size);
+    }
+    if (trailing_nans) {
+        for (arrsize_t ii = size - nan_count; ii < size; ++ii) {
             arr[ii] = val.f_;
-            nan_count -= 1;
         }
     }
     else {
-        for (arrsize_t ii = size - 1; nan_count > 0; --ii) {
+        for (arrsize_t ii = 0; ii < nan_count; ++ii) {
             arr[ii] = val.f_;
-            nan_count -= 1;
         }
     }
 }

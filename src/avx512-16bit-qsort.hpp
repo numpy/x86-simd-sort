@@ -584,7 +584,8 @@ avx512_qsort_fp16_helper(uint16_t *arr, arrsize_t arrsize)
 avx512_qsort_fp16(uint16_t *arr,
                   arrsize_t arrsize,
                   bool hasnan = false,
-                  bool descending = false)
+                  bool descending = false,
+                  bool trailing_nans = true)
 {
     using vtype = zmm_vector<float16>;
 
@@ -599,7 +600,7 @@ avx512_qsort_fp16(uint16_t *arr,
         else {
             avx512_qsort_fp16_helper<Comparator<vtype, false>>(arr, arrsize);
         }
-        replace_inf_with_nan(arr, arrsize, nan_count, descending);
+        replace_inf_with_nan(arr, arrsize, nan_count, descending, trailing_nans);
     }
 
 #ifdef __MMX__
@@ -613,7 +614,8 @@ avx512_qselect_fp16(uint16_t *arr,
                     arrsize_t k,
                     arrsize_t arrsize,
                     bool hasnan = false,
-                    bool descending = false)
+                    bool descending = false,
+                    bool trailing_nans = true)
 {
     using vtype = zmm_vector<float16>;
 
@@ -624,7 +626,7 @@ avx512_qselect_fp16(uint16_t *arr,
     arrsize_t index_last_elem = arrsize - 1;
 
     if (UNLIKELY(hasnan)) {
-        if (descending) {
+        if (!trailing_nans) {
             index_first_elem = move_nans_to_start_of_array(arr, arrsize);
         }
         else {
@@ -662,10 +664,12 @@ avx512_partial_qsort_fp16(uint16_t *arr,
                           arrsize_t k,
                           arrsize_t arrsize,
                           bool hasnan = false,
-                          bool descending = false)
+                          bool descending = false,
+                          bool trailing_nans = true)
 {
     if (k == 0) return;
-    avx512_qselect_fp16(arr, k - 1, arrsize, hasnan, descending);
-    avx512_qsort_fp16(arr, k - 1, hasnan, descending);
+    avx512_qselect_fp16(arr, k - 1, arrsize, hasnan, descending,
+                        trailing_nans);
+    avx512_qsort_fp16(arr, k - 1, hasnan, descending, trailing_nans);
 }
 #endif // AVX512_QSORT_16BIT

@@ -5,27 +5,32 @@
 namespace xss {
 namespace fp16_spr {
     template <>
-    void qsort(_Float16 *arr, size_t size, bool hasnan, bool descending)
+    void qsort(_Float16 *arr, size_t size, bool hasnan, bool descending,
+               bool trailing_nans)
     {
-        x86simdsortStatic::qsort(arr, size, hasnan, descending);
+        x86simdsortStatic::qsort(arr, size, hasnan, descending, trailing_nans);
     }
     template <>
     void qselect(_Float16 *arr,
                  size_t k,
                  size_t arrsize,
                  bool hasnan,
-                 bool descending)
+                 bool descending,
+                 bool trailing_nans)
     {
-        x86simdsortStatic::qselect(arr, k, arrsize, hasnan, descending);
+        x86simdsortStatic::qselect(arr, k, arrsize, hasnan, descending,
+                                   trailing_nans);
     }
     template <>
     void partial_qsort(_Float16 *arr,
                        size_t k,
                        size_t arrsize,
                        bool hasnan,
-                       bool descending)
+                       bool descending,
+                       bool trailing_nans)
     {
-        x86simdsortStatic::partial_qsort(arr, k, arrsize, hasnan, descending);
+        x86simdsortStatic::partial_qsort(arr, k, arrsize, hasnan, descending,
+                                         trailing_nans);
     }
 } // namespace fp16_spr
 } // namespace xss

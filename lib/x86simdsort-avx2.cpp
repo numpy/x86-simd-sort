@@ -5,33 +5,39 @@
 
 #define DEFINE_ALL_METHODS(type) \
     template <> \
-    void qsort(type *arr, size_t arrsize, bool hasnan, bool descending) \
+    void qsort(type *arr, size_t arrsize, bool hasnan, bool descending, \
+               bool trailing_nans) \
     { \
-        x86simdsortStatic::qsort(arr, arrsize, hasnan, descending); \
+        x86simdsortStatic::qsort(arr, arrsize, hasnan, descending, \
+                                 trailing_nans); \
     } \
     template <> \
-    void qselect( \
-            type *arr, size_t k, size_t arrsize, bool hasnan, bool descending) \
+    void qselect(type *arr, size_t k, size_t arrsize, bool hasnan, \
+                 bool descending, bool trailing_nans) \
     { \
-        x86simdsortStatic::qselect(arr, k, arrsize, hasnan, descending); \
+        x86simdsortStatic::qselect(arr, k, arrsize, hasnan, descending, \
+                                   trailing_nans); \
     } \
     template <> \
-    void partial_qsort( \
-            type *arr, size_t k, size_t arrsize, bool hasnan, bool descending) \
+    void partial_qsort(type *arr, size_t k, size_t arrsize, bool hasnan, \
+                       bool descending, bool trailing_nans) \
     { \
-        x86simdsortStatic::partial_qsort(arr, k, arrsize, hasnan, descending); \
+        x86simdsortStatic::partial_qsort(arr, k, arrsize, hasnan, descending, \
+                                         trailing_nans); \
     } \
     template <> \
-    std::vector<size_t> argsort( \
-            const type *arr, size_t arrsize, bool hasnan, bool descending) \
+    std::vector<size_t> argsort(const type *arr, size_t arrsize, bool hasnan, \
+                                bool descending, bool trailing_nans) \
     { \
-        return x86simdsortStatic::argsort(arr, arrsize, hasnan, descending); \
+        return x86simdsortStatic::argsort(arr, arrsize, hasnan, descending, \
+                                          trailing_nans); \
     } \
     template <> \
-    std::vector<size_t> argselect( \
-            const type *arr, size_t k, size_t arrsize, bool hasnan) \
+    std::vector<size_t> argselect(const type *arr, size_t k, size_t arrsize, \
+                                  bool hasnan, bool trailing_nans) \
     { \
-        return x86simdsortStatic::argselect(arr, k, arrsize, hasnan); \
+        return x86simdsortStatic::argselect(arr, k, arrsize, hasnan, \
+                                            trailing_nans); \
     }
 
 #define DEFINE_KEYVALUE_METHODS_BASE(type1, type2) \

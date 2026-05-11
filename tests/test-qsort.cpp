@@ -76,7 +76,7 @@ TYPED_TEST_P(simdsort, test_qsort_descending)
 #ifndef XSS_ASAN_CI_NOCHECK
             std::sort(sortedarr.begin(),
                       sortedarr.end(),
-                      compare<TypeParam, std::greater<TypeParam>>());
+                      compare_nan_end<TypeParam, std::greater<TypeParam>>());
             IS_SORTED(sortedarr, arr, type);
 #endif
             arr.clear();
@@ -119,7 +119,7 @@ TYPED_TEST_P(simdsort, test_argsort_descending)
 #ifndef XSS_ASAN_CI_NOCHECK
             std::sort(sortedarr.begin(),
                       sortedarr.end(),
-                      compare<TypeParam, std::greater<TypeParam>>());
+                      compare_nan_end<TypeParam, std::greater<TypeParam>>());
             IS_ARG_SORTED(sortedarr, arr, arg, type);
 #endif
             arr.clear();
@@ -172,7 +172,7 @@ TYPED_TEST_P(simdsort, test_qselect_descending)
             std::nth_element(sortedarr.begin(),
                              sortedarr.begin() + k,
                              sortedarr.end(),
-                             compare<TypeParam, std::greater<TypeParam>>());
+                             compare_nan_end<TypeParam, std::greater<TypeParam>>());
             if (size == 0) continue;
             IS_ARR_PARTITIONED(arr, k, sortedarr[k], type, true);
 #endif
@@ -248,7 +248,7 @@ TYPED_TEST_P(simdsort, test_partial_qsort_descending)
 #ifndef XSS_ASAN_CI_NOCHECK
             std::sort(sortedarr.begin(),
                       sortedarr.end(),
-                      compare<TypeParam, std::greater<TypeParam>>());
+                      compare_nan_end<TypeParam, std::greater<TypeParam>>());
             if (size == 0) continue;
             IS_ARR_PARTIALSORTED(arr, k, sortedarr, type);
 #endif
