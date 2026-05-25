@@ -78,12 +78,17 @@ Equivalent to `np.argselect` in
 [NumPy](https://numpy.org/doc/stable/reference/generated/numpy.argpartition.html).
 
 ```cpp
-void x86simdsortStatic::argselect<T>(const T* arr, size_t *arg, size_t k, size_t arrsize, bool hasnan = false, bool trailing_nans = true);
+void x86simdsortStatic::argselect<T>(const T* arr, size_t *arg, size_t k, size_t arrsize, bool hasnan = false, bool descending = false, bool trailing_nans = true);
 ```
 Supported datatypes: `uint32_t`, `int32_t`, `float`, `uint64_t`, `int64_t` and
 `double`.
 
-The algorithm resorts to scalar `std::sort` if the array contains NaNs.
+When `descending=true`, the k-th element is the k-th **largest** and elements
+before index k are all greater than or equal to it. For floating-point types,
+if `bool hasnan` is set, NaN placement is controlled by `trailing_nans`:
+`true` (default) places NaNs at the end; `false` places them at the beginning.
+
+The algorithm resorts to scalar `std::nth_element` if the array contains NaNs.
 
 #### Key-value sort
 ```cpp

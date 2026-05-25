@@ -57,7 +57,7 @@ data types.
 ## Arg sort routines on arrays
 ```cpp
 std::vector<size_t> arg = x86simdsort::argsort(const T* arr, size_t size, bool hasnan, bool descending, bool trailing_nans);
-std::vector<size_t> arg = x86simdsort::argselect(const T* arr, size_t k, size_t size, bool hasnan, bool trailing_nans);
+std::vector<size_t> arg = x86simdsort::argselect(const T* arr, size_t k, size_t size, bool hasnan, bool descending, bool trailing_nans);
 ```
 Supported datatypes: `T` $\in$ `[_Float16, uint16_t, int16_t, float, uint32_t, int32_t, double,
 uint64_t, int64_t]` Note that argsort and argselect are not accelerated with SIMD when using 16-bit
@@ -182,6 +182,11 @@ is controlled by the optional `bool trailing_nans` parameter (default `true`):
   result, regardless of sort direction.
 - `trailing_nans=false`: NaN values are placed at the **beginning** of the
   result, regardless of sort direction.
+
+All routines accept an optional `bool descending` parameter (default `false`).
+When `descending=true`, results are in descending order. For `argselect`, the
+k-th element becomes the k-th **largest**, with all elements before index k
+being greater than or equal to it.
 
 Note that the arg methods (argsort and argselect) will not use the SIMD based
 algorithms if they detect NaN values in the array. You can read details of all the implementations
