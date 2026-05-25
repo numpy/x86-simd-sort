@@ -183,10 +183,8 @@ is controlled by the optional `bool trailing_nans` parameter (default `true`):
 - `trailing_nans=false`: NaN values are placed at the **beginning** of the
   result, regardless of sort direction.
 
-Note that `qsort` will replace all NaN values with `std::numeric_limits<T>::quiet_NaN`;
-the original bit-exact NaN payload is not preserved. Also note that the arg
-methods (argsort and argselect) will not use the SIMD based algorithms if they
-detect NaN values in the array. You can read details of all the implementations
+Note that the arg methods (argsort and argselect) will not use the SIMD based
+algorithms if they detect NaN values in the array. You can read details of all the implementations
 [here](https://github.com/intel/x86-simd-sort/blob/main/src/README.md).
 
 ## Performance comparison on AVX-512: `object_qsort` v/s `std::sort`
