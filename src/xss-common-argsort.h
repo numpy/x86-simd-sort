@@ -731,8 +731,11 @@ X86_SIMD_SORT_INLINE void xss_argselect(const T *arr,
             }
         }
         UNUSED(hasnan);
+        /* For descending, partition at the mirror position so the k-th
+         * largest lands at arrsize-1-k; reversal then moves it to k. */
+        arrsize_t pos = descending ? arrsize - 1 - k : k;
         argselect_<vectype, argtype>(
-                arr, arg, k, 0, arrsize - 1, 2 * (arrsize_t)log2(arrsize));
+                arr, arg, pos, 0, arrsize - 1, 2 * (arrsize_t)log2(arrsize));
 
         if (descending) { std::reverse(arg, arg + arrsize); }
     }
