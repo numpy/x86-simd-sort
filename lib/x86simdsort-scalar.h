@@ -144,12 +144,18 @@ namespace scalar {
         std::iota(arg.begin(), arg.end(), 0);
         std::function<bool(size_t, size_t)> cmp;
         if (trailing_nans) {
-            if (descending) { cmp = compare_arg_nan_end<T, std::greater<T>>(arr); }
-            else { cmp = compare_arg<T, std::less<T>>(arr); }
+            if (descending) {
+                cmp = compare_arg_nan_end<T, std::greater<T>>(arr);
+            }
+            else {
+                cmp = compare_arg<T, std::less<T>>(arr);
+            }
         }
         else {
             if (descending) { cmp = compare_arg<T, std::greater<T>>(arr); }
-            else { cmp = compare_arg_nan_begin<T, std::less<T>>(arr); }
+            else {
+                cmp = compare_arg_nan_begin<T, std::less<T>>(arr);
+            }
         }
         std::nth_element(arg.begin(), arg.begin() + k, arg.end(), cmp);
         return arg;

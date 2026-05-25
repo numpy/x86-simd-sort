@@ -483,12 +483,11 @@ TYPED_TEST_P(simdsort, test_argselect_leading_nans)
                     auto arg = x86simdsort::argselect(
                             arr.data(), k, arr.size(), true, false, false);
 #ifndef XSS_ASAN_CI_NOCHECK
-                    std::nth_element(
-                            sortedarr.begin(),
-                            sortedarr.begin() + k,
-                            sortedarr.end(),
-                            compare_nan_begin<TypeParam,
-                                              std::less<TypeParam>>());
+                    std::nth_element(sortedarr.begin(),
+                                     sortedarr.begin() + k,
+                                     sortedarr.end(),
+                                     compare_nan_begin<TypeParam,
+                                                       std::less<TypeParam>>());
                     if (size == 0) continue;
                     IS_ARG_PARTITIONED(arr, arg, sortedarr[k], k, type);
 #endif

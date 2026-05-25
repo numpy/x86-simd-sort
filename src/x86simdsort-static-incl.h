@@ -166,8 +166,13 @@ X86_SIMD_SORT_FINLINE void keyvalue_partial_sort(T1 *key,
     { \
         std::vector<size_t> indices(size); \
         std::iota(indices.begin(), indices.end(), 0); \
-        x86simdsortStatic::argselect( \
-                arr, indices.data(), k, size, hasnan, descending, trailing_nans); \
+        x86simdsortStatic::argselect(arr, \
+                                     indices.data(), \
+                                     k, \
+                                     size, \
+                                     hasnan, \
+                                     descending, \
+                                     trailing_nans); \
         return indices; \
     } \
     template <typename T1, typename T2> \
