@@ -51,32 +51,6 @@ X86_SIMD_SORT_INLINE_ONLY bool is_a_nan<uint16_t>(uint16_t elem)
     return ((elem & 0x7c00u) == 0x7c00u) && ((elem & 0x03ffu) != 0);
 }
 
-template <typename vtype, typename T>
-X86_SIMD_SORT_INLINE arrsize_t replace_nan_with_inf(T *arr, arrsize_t size)
-{
-    arrsize_t nan_count = 0;
-    using opmask_t = typename vtype::opmask_t;
-    using reg_t = typename vtype::reg_t;
-    opmask_t loadmask;
-    reg_t in;
-    /*
-     * (ii + numlanes) can never overflow: max val of size is 2**63 on 64-bit
-     * and 2**31 on 32-bit systems
-     */
-    for (arrsize_t ii = 0; ii < size; ii = ii + vtype::numlanes) {
-        if (size - ii < vtype::numlanes) {
-            loadmask = vtype::get_partial_loadmask(size - ii);
-            in = vtype::maskz_loadu(loadmask, arr + ii);
-        }
-        else {
-            in = vtype::loadu(arr + ii);
-        }
-        opmask_t nanmask = vtype::template fpclass<0x01 | 0x80>(in);
-        nan_count += _mm_popcnt_u32(vtype::convert_mask_to_int(nanmask));
-        vtype::mask_storeu(arr + ii, nanmask, vtype::zmm_max());
-    }
-    return nan_count;
-}
 
 template <typename vtype, typename type_t>
 X86_SIMD_SORT_INLINE bool array_has_nan(const type_t *arr, arrsize_t size)
@@ -104,46 +78,6 @@ X86_SIMD_SORT_INLINE bool array_has_nan(const type_t *arr, arrsize_t size)
     return found_nan;
 }
 
-template <typename type_t>
-X86_SIMD_SORT_INLINE void replace_inf_with_nan(type_t *arr,
-                                               arrsize_t size,
-                                               arrsize_t nan_count,
-                                               bool descending,
-                                               bool trailing_nans)
-{
-    if (nan_count == 0) return;
-    // After ascending sort +inf lands at the end; after descending at the start.
-    // When the desired NaN position differs from where +inf landed, rotate first.
-    if (descending && trailing_nans) {
-        // +inf at beginning, want NaN at end: rotate left
-        std::rotate(arr, arr + nan_count, arr + size);
-    }
-    else if (!descending && !trailing_nans) {
-        // +inf at end, want NaN at beginning: rotate right
-        std::rotate(arr, arr + (size - nan_count), arr + size);
-    }
-    // Write NaN at the now-correct position
-    if (trailing_nans) {
-        for (arrsize_t ii = size - nan_count; ii < size; ++ii) {
-            if constexpr (xss::fp::is_floating_point_v<type_t>) {
-                arr[ii] = xss::fp::quiet_NaN<type_t>();
-            }
-            else {
-                arr[ii] = 0x7c01; // std::quiet_nan
-            }
-        }
-    }
-    else {
-        for (arrsize_t ii = 0; ii < nan_count; ++ii) {
-            if constexpr (xss::fp::is_floating_point_v<type_t>) {
-                arr[ii] = xss::fp::quiet_NaN<type_t>();
-            }
-            else {
-                arr[ii] = 0x7c01; // std::quiet_nan
-            }
-        }
-    }
-}
 
 /*
  * Sort all the NAN's to end of the array and return the index of the last elem
@@ -670,49 +604,59 @@ xss_qsort(T *arr, arrsize_t arrsize, bool hasnan, bool trailing_nans = true)
                                       Comparator<vtype, false>>::type;
 
     if (arrsize > 1) {
-        arrsize_t nan_count = 0;
+        arrsize_t index_first_elem = 0;
+        arrsize_t index_last_elem = arrsize - 1;
         if constexpr (xss::fp::is_floating_point_v<T>) {
             if (UNLIKELY(hasnan)) {
-                nan_count = replace_nan_with_inf<vtype>(arr, arrsize);
+                if (!trailing_nans) {
+                    index_first_elem = move_nans_to_start_of_array(arr, arrsize);
+                }
+                else {
+                    index_last_elem = move_nans_to_end_of_array(arr, arrsize);
+                }
             }
         }
 
         UNUSED(hasnan);
 
+        if (index_first_elem <= index_last_elem && index_last_elem < arrsize) {
 #ifdef XSS_COMPILE_OPENMP
 
-        bool use_parallel = arrsize > 100000;
+            bool use_parallel = (index_last_elem - index_first_elem + 1) > 100000;
 
-        if (use_parallel) {
-            int thread_count = xss_get_num_threads();
-            arrsize_t task_threshold
-                    = std::max((arrsize_t)100000, arrsize / 100);
+            if (use_parallel) {
+                int thread_count = xss_get_num_threads();
+                arrsize_t task_threshold = std::max(
+                        (arrsize_t)100000,
+                        (index_last_elem - index_first_elem + 1) / 100);
 
-            // We use omp parallel and then omp single to setup the threads that will run the omp task calls in qsort_
-            // The omp single prevents multiple threads from running the initial qsort_ simultaneously and causing problems
-            // Note that we do not use the if(...) clause built into OpenMP, because it causes a performance regression for small arrays
+                // We use omp parallel and then omp single to setup the threads that will run the omp task calls in qsort_
+                // The omp single prevents multiple threads from running the initial qsort_ simultaneously and causing problems
+                // Note that we do not use the if(...) clause built into OpenMP, because it causes a performance regression for small arrays
 #pragma omp parallel num_threads(thread_count)
 #pragma omp single
-            qsort_<vtype, comparator, T>(arr,
-                                         0,
-                                         arrsize - 1,
-                                         2 * (arrsize_t)log2(arrsize),
-                                         task_threshold);
+                qsort_<vtype, comparator, T>(arr,
+                                             index_first_elem,
+                                             index_last_elem,
+                                             2 * (arrsize_t)log2(arrsize),
+                                             task_threshold);
 #pragma omp taskwait
-        }
-        else {
-            qsort_<vtype, comparator, T>(arr,
-                                         0,
-                                         arrsize - 1,
-                                         2 * (arrsize_t)log2(arrsize),
-                                         std::numeric_limits<arrsize_t>::max());
-        }
+            }
+            else {
+                qsort_<vtype, comparator, T>(arr,
+                                             index_first_elem,
+                                             index_last_elem,
+                                             2 * (arrsize_t)log2(arrsize),
+                                             std::numeric_limits<arrsize_t>::max());
+            }
 #else
-        qsort_<vtype, comparator, T>(
-                arr, 0, arrsize - 1, 2 * (arrsize_t)log2(arrsize), 0);
+            qsort_<vtype, comparator, T>(arr,
+                                         index_first_elem,
+                                         index_last_elem,
+                                         2 * (arrsize_t)log2(arrsize),
+                                         0);
 #endif
-
-        replace_inf_with_nan(arr, arrsize, nan_count, descending, trailing_nans);
+        }
     }
 
 #ifdef __MMX__
