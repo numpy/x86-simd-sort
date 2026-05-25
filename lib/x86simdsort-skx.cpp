@@ -51,10 +51,11 @@
                                   size_t k, \
                                   size_t arrsize, \
                                   bool hasnan, \
+                                  bool descending, \
                                   bool trailing_nans) \
     { \
         return x86simdsortStatic::argselect( \
-                arr, k, arrsize, hasnan, trailing_nans); \
+                arr, k, arrsize, hasnan, descending, trailing_nans); \
     }
 
 #define DEFINE_KEYVALUE_METHODS_BASE(type1, type2) \

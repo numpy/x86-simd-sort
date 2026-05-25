@@ -367,7 +367,7 @@ TYPED_TEST_P(simdsort, test_qselect_leading_nans)
     }
 }
 
-TYPED_TEST_P(simdsort, test_argselect)
+TYPED_TEST_P(simdsort, test_argselect_ascending)
 {
     for (auto type : this->arrtype) {
         bool hasnan = is_nan_test(type);
@@ -387,6 +387,131 @@ TYPED_TEST_P(simdsort, test_argselect)
 #endif
             arr.clear();
             sortedarr.clear();
+        }
+    }
+}
+
+TYPED_TEST_P(simdsort, test_argselect_descending)
+{
+    for (auto type : this->arrtype) {
+        bool hasnan = is_nan_test(type);
+        for (auto size : this->arrsize) {
+            size_t k = size != 0 ? rand() % size : 0;
+            std::vector<TypeParam> arr = get_array<TypeParam>(type, size);
+            std::vector<TypeParam> sortedarr = arr;
+
+            auto arg = x86simdsort::argselect(
+                    arr.data(), k, arr.size(), hasnan, true);
+#ifndef XSS_ASAN_CI_NOCHECK
+            std::nth_element(
+                    sortedarr.begin(),
+                    sortedarr.begin() + k,
+                    sortedarr.end(),
+                    compare_nan_end<TypeParam, std::greater<TypeParam>>());
+            if (size == 0) continue;
+            IS_ARG_PARTITIONED(arr, arg, sortedarr[k], k, type, true);
+#endif
+            arr.clear();
+            sortedarr.clear();
+        }
+    }
+}
+
+TYPED_TEST_P(simdsort, test_argselect_trailing_nans)
+{
+    if constexpr (xss::fp::is_floating_point_v<TypeParam>) {
+        std::vector<std::string> nan_types
+                = {"rand_with_nan", "rand_with_max_and_nan"};
+        for (auto type : nan_types) {
+            for (auto size : this->arrsize) {
+                size_t k = size != 0 ? rand() % size : 0;
+                std::vector<TypeParam> base = get_array<TypeParam>(type, size);
+
+                // ascending, NaNs at end
+                {
+                    std::vector<TypeParam> arr = base;
+                    std::vector<TypeParam> sortedarr = base;
+                    auto arg = x86simdsort::argselect(
+                            arr.data(), k, arr.size(), true, false, true);
+#ifndef XSS_ASAN_CI_NOCHECK
+                    std::nth_element(
+                            sortedarr.begin(),
+                            sortedarr.begin() + k,
+                            sortedarr.end(),
+                            compare_nan_end<TypeParam, std::less<TypeParam>>());
+                    if (size == 0) continue;
+                    IS_ARG_PARTITIONED(arr, arg, sortedarr[k], k, type);
+#endif
+                }
+
+                // descending, NaNs at end
+                {
+                    std::vector<TypeParam> arr = base;
+                    std::vector<TypeParam> sortedarr = base;
+                    auto arg = x86simdsort::argselect(
+                            arr.data(), k, arr.size(), true, true, true);
+#ifndef XSS_ASAN_CI_NOCHECK
+                    std::nth_element(
+                            sortedarr.begin(),
+                            sortedarr.begin() + k,
+                            sortedarr.end(),
+                            compare_nan_end<TypeParam,
+                                            std::greater<TypeParam>>());
+                    if (size == 0) continue;
+                    IS_ARG_PARTITIONED(arr, arg, sortedarr[k], k, type, true);
+#endif
+                }
+            }
+        }
+    }
+}
+
+TYPED_TEST_P(simdsort, test_argselect_leading_nans)
+{
+    if constexpr (xss::fp::is_floating_point_v<TypeParam>) {
+        std::vector<std::string> nan_types
+                = {"rand_with_nan", "rand_with_max_and_nan"};
+        for (auto type : nan_types) {
+            for (auto size : this->arrsize) {
+                size_t k = size != 0 ? rand() % size : 0;
+                std::vector<TypeParam> base = get_array<TypeParam>(type, size);
+
+                // ascending, NaNs at start
+                {
+                    std::vector<TypeParam> arr = base;
+                    std::vector<TypeParam> sortedarr = base;
+                    auto arg = x86simdsort::argselect(
+                            arr.data(), k, arr.size(), true, false, false);
+#ifndef XSS_ASAN_CI_NOCHECK
+                    std::nth_element(
+                            sortedarr.begin(),
+                            sortedarr.begin() + k,
+                            sortedarr.end(),
+                            compare_nan_begin<TypeParam,
+                                              std::less<TypeParam>>());
+                    if (size == 0) continue;
+                    IS_ARG_PARTITIONED(arr, arg, sortedarr[k], k, type);
+#endif
+                }
+
+                // descending, NaNs at start
+                {
+                    std::vector<TypeParam> arr = base;
+                    std::vector<TypeParam> sortedarr = base;
+                    auto arg = x86simdsort::argselect(
+                            arr.data(), k, arr.size(), true, true, false);
+#ifndef XSS_ASAN_CI_NOCHECK
+                    std::nth_element(
+                            sortedarr.begin(),
+                            sortedarr.begin() + k,
+                            sortedarr.end(),
+                            compare_nan_begin<TypeParam,
+                                              std::greater<TypeParam>>());
+                    if (size == 0) continue;
+                    IS_ARG_PARTITIONED(arr, arg, sortedarr[k], k, type, true);
+#endif
+                }
+            }
         }
     }
 }
@@ -571,7 +696,10 @@ REGISTER_TYPED_TEST_SUITE_P(simdsort,
                             test_argsort_descending,
                             test_argsort_trailing_nans,
                             test_argsort_leading_nans,
-                            test_argselect,
+                            test_argselect_ascending,
+                            test_argselect_descending,
+                            test_argselect_trailing_nans,
+                            test_argselect_leading_nans,
                             test_qselect_ascending,
                             test_qselect_descending,
                             test_qselect_trailing_nans,

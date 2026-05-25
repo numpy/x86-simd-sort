@@ -136,23 +136,22 @@ namespace scalar {
                                   size_t k,
                                   size_t arrsize,
                                   bool hasnan,
+                                  bool descending,
                                   bool trailing_nans)
     {
         UNUSED(hasnan);
         std::vector<size_t> arg(arrsize);
         std::iota(arg.begin(), arg.end(), 0);
-        if (hasnan && !trailing_nans) {
-            std::nth_element(arg.begin(),
-                             arg.begin() + k,
-                             arg.end(),
-                             compare_arg_nan_begin<T, std::less<T>>(arr));
+        std::function<bool(size_t, size_t)> cmp;
+        if (trailing_nans) {
+            if (descending) { cmp = compare_arg_nan_end<T, std::greater<T>>(arr); }
+            else { cmp = compare_arg<T, std::less<T>>(arr); }
         }
         else {
-            std::nth_element(arg.begin(),
-                             arg.begin() + k,
-                             arg.end(),
-                             compare_arg<T, std::less<T>>(arr));
+            if (descending) { cmp = compare_arg<T, std::greater<T>>(arr); }
+            else { cmp = compare_arg_nan_begin<T, std::less<T>>(arr); }
         }
+        std::nth_element(arg.begin(), arg.begin() + k, arg.end(), cmp);
         return arg;
     }
     template <typename T1, typename T2>

@@ -57,6 +57,7 @@ XSS_EXPORT_SYMBOL std::vector<size_t> argselect(const T *arr,
                                                 size_t k,
                                                 size_t arrsize,
                                                 bool hasnan = false,
+                                                bool descending = false,
                                                 bool trailing_nans = true);
 
 // keyvalue sort

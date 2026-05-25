@@ -57,6 +57,7 @@
                                                   size_t k, \
                                                   size_t arrsize, \
                                                   bool hasnan = false, \
+                                                  bool descending = false, \
                                                   bool trailing_nans = true); \
     }
 

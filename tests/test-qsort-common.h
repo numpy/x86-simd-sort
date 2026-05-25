@@ -113,13 +113,14 @@ void IS_ARG_PARTITIONED(std::vector<T> arr,
                         std::vector<size_t> arg,
                         T true_kth,
                         size_t k,
-                        std::string type)
+                        std::string type,
+                        bool descending = false)
 {
     EXPECT_UNIQUE(arg)
     std::vector<T> part_arr;
     for (auto ii : arg) {
         part_arr.push_back(arr[ii]);
     }
-    IS_ARR_PARTITIONED(part_arr, k, true_kth, type);
+    IS_ARR_PARTITIONED(part_arr, k, true_kth, type, descending);
 }
 #endif

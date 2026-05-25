@@ -173,20 +173,21 @@ namespace x86simdsort {
 #define DECLARE_INTERNAL_argselect(TYPE) \
     static void CAT(resolve_argselect, TYPE)(void); \
     static std::vector<size_t> (*internal_argselect##TYPE)( \
-            const TYPE *, size_t, size_t, bool, bool) \
+            const TYPE *, size_t, size_t, bool, bool, bool) \
             = NULL; \
     template <> \
     std::vector<size_t> XSS_EXPORT_SYMBOL argselect(const TYPE *arr, \
                                                     size_t k, \
                                                     size_t arrsize, \
                                                     bool hasnan, \
+                                                    bool descending, \
                                                     bool trailing_nans) \
     { \
         if (internal_argselect##TYPE == NULL) { \
             CAT(resolve_argselect, TYPE)(); \
         } \
         return (*internal_argselect##TYPE)( \
-                arr, k, arrsize, hasnan, trailing_nans); \
+                arr, k, arrsize, hasnan, descending, trailing_nans); \
     }
 
 #else
@@ -254,17 +255,18 @@ namespace x86simdsort {
 
 #define DECLARE_INTERNAL_argselect(TYPE) \
     static std::vector<size_t> (*internal_argselect##TYPE)( \
-            const TYPE *, size_t, size_t, bool, bool) \
+            const TYPE *, size_t, size_t, bool, bool, bool) \
             = NULL; \
     template <> \
     std::vector<size_t> XSS_EXPORT_SYMBOL argselect(const TYPE *arr, \
                                                     size_t k, \
                                                     size_t arrsize, \
                                                     bool hasnan, \
+                                                    bool descending, \
                                                     bool trailing_nans) \
     { \
         return (*internal_argselect##TYPE)( \
-                arr, k, arrsize, hasnan, trailing_nans); \
+                arr, k, arrsize, hasnan, descending, trailing_nans); \
     }
 
 #endif // _MSC_VER

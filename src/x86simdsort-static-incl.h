@@ -50,6 +50,7 @@ X86_SIMD_SORT_FINLINE std::vector<size_t> argselect(const T *arr,
                                                     size_t k,
                                                     size_t size,
                                                     bool hasnan = false,
+                                                    bool descending = false,
                                                     bool trailing_nans = true);
 
 /* argselect API required by NumPy: */
@@ -59,6 +60,7 @@ void X86_SIMD_SORT_FINLINE argselect(const T *arr,
                                      size_t k,
                                      size_t size,
                                      bool hasnan = false,
+                                     bool descending = false,
                                      bool trailing_nans = true);
 
 template <typename T1, typename T2>
@@ -148,9 +150,10 @@ X86_SIMD_SORT_FINLINE void keyvalue_partial_sort(T1 *key,
             size_t k, \
             size_t size, \
             bool hasnan, \
+            bool descending, \
             bool trailing_nans) \
     { \
-        ISA##_argselect(arr, arg, k, size, hasnan, trailing_nans); \
+        ISA##_argselect(arr, arg, k, size, hasnan, descending, trailing_nans); \
     } \
     template <typename T> \
     X86_SIMD_SORT_FINLINE std::vector<size_t> x86simdsortStatic::argselect( \
@@ -158,12 +161,13 @@ X86_SIMD_SORT_FINLINE void keyvalue_partial_sort(T1 *key,
             size_t k, \
             size_t size, \
             bool hasnan, \
+            bool descending, \
             bool trailing_nans) \
     { \
         std::vector<size_t> indices(size); \
         std::iota(indices.begin(), indices.end(), 0); \
         x86simdsortStatic::argselect( \
-                arr, indices.data(), k, size, hasnan, trailing_nans); \
+                arr, indices.data(), k, size, hasnan, descending, trailing_nans); \
         return indices; \
     } \
     template <typename T1, typename T2> \
