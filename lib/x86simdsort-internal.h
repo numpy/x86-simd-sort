@@ -53,9 +53,11 @@
                                                 bool descending = false, \
                                                 bool trailing_nans = true); \
     template <typename T> \
-    XSS_HIDE_SYMBOL std::vector<size_t> \
-    argselect(const T *arr, size_t k, size_t arrsize, bool hasnan = false, \
-              bool trailing_nans = true); \
+    XSS_HIDE_SYMBOL std::vector<size_t> argselect(const T *arr, \
+                                                  size_t k, \
+                                                  size_t arrsize, \
+                                                  bool hasnan = false, \
+                                                  bool trailing_nans = true); \
     }
 
 namespace xss {

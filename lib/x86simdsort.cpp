@@ -104,44 +104,53 @@ namespace x86simdsort {
     static void (*internal_qsort##TYPE)(TYPE *, size_t, bool, bool, bool) \
             = NULL; \
     template <> \
-    void XSS_EXPORT_SYMBOL qsort(TYPE *arr, size_t arrsize, bool hasnan, \
-                                 bool descending, bool trailing_nans) \
+    void XSS_EXPORT_SYMBOL qsort(TYPE *arr, \
+                                 size_t arrsize, \
+                                 bool hasnan, \
+                                 bool descending, \
+                                 bool trailing_nans) \
     { \
         if (internal_qsort##TYPE == NULL) { CAT(resolve_qsort, TYPE)(); } \
-        (*internal_qsort##TYPE)(arr, arrsize, hasnan, descending, \
-                                trailing_nans); \
+        (*internal_qsort##TYPE)( \
+                arr, arrsize, hasnan, descending, trailing_nans); \
     }
 
 #define DECLARE_INTERNAL_qselect(TYPE) \
     static void CAT(resolve_qselect, TYPE)(void); \
-    static void (*internal_qselect##TYPE)(TYPE *, size_t, size_t, bool, bool, \
-                                          bool) \
+    static void (*internal_qselect##TYPE)( \
+            TYPE *, size_t, size_t, bool, bool, bool) \
             = NULL; \
     template <> \
-    void XSS_EXPORT_SYMBOL qselect(TYPE *arr, size_t k, size_t arrsize, \
-                                   bool hasnan, bool descending, \
+    void XSS_EXPORT_SYMBOL qselect(TYPE *arr, \
+                                   size_t k, \
+                                   size_t arrsize, \
+                                   bool hasnan, \
+                                   bool descending, \
                                    bool trailing_nans) \
     { \
         if (internal_qselect##TYPE == NULL) { CAT(resolve_qselect, TYPE)(); } \
-        (*internal_qselect##TYPE)(arr, k, arrsize, hasnan, descending, \
-                                  trailing_nans); \
+        (*internal_qselect##TYPE)( \
+                arr, k, arrsize, hasnan, descending, trailing_nans); \
     }
 
 #define DECLARE_INTERNAL_partial_qsort(TYPE) \
     static void CAT(resolve_partial_qsort, TYPE)(void); \
-    static void (*internal_partial_qsort##TYPE)(TYPE *, size_t, size_t, bool, \
-                                                bool, bool) \
+    static void (*internal_partial_qsort##TYPE)( \
+            TYPE *, size_t, size_t, bool, bool, bool) \
             = NULL; \
     template <> \
-    void XSS_EXPORT_SYMBOL partial_qsort(TYPE *arr, size_t k, size_t arrsize, \
-                                         bool hasnan, bool descending, \
+    void XSS_EXPORT_SYMBOL partial_qsort(TYPE *arr, \
+                                         size_t k, \
+                                         size_t arrsize, \
+                                         bool hasnan, \
+                                         bool descending, \
                                          bool trailing_nans) \
     { \
         if (internal_partial_qsort##TYPE == NULL) { \
             CAT(resolve_partial_qsort, TYPE)(); \
         } \
-        (*internal_partial_qsort##TYPE)(arr, k, arrsize, hasnan, descending, \
-                                        trailing_nans); \
+        (*internal_partial_qsort##TYPE)( \
+                arr, k, arrsize, hasnan, descending, trailing_nans); \
     }
 
 #define DECLARE_INTERNAL_argsort(TYPE) \
@@ -150,13 +159,15 @@ namespace x86simdsort {
             const TYPE *, size_t, bool, bool, bool) \
             = NULL; \
     template <> \
-    std::vector<size_t> XSS_EXPORT_SYMBOL argsort( \
-            const TYPE *arr, size_t arrsize, bool hasnan, bool descending, \
-            bool trailing_nans) \
+    std::vector<size_t> XSS_EXPORT_SYMBOL argsort(const TYPE *arr, \
+                                                  size_t arrsize, \
+                                                  bool hasnan, \
+                                                  bool descending, \
+                                                  bool trailing_nans) \
     { \
         if (internal_argsort##TYPE == NULL) { CAT(resolve_argsort, TYPE)(); } \
-        return (*internal_argsort##TYPE)(arr, arrsize, hasnan, descending, \
-                                        trailing_nans); \
+        return (*internal_argsort##TYPE)( \
+                arr, arrsize, hasnan, descending, trailing_nans); \
     }
 
 #define DECLARE_INTERNAL_argselect(TYPE) \
@@ -165,15 +176,17 @@ namespace x86simdsort {
             const TYPE *, size_t, size_t, bool, bool) \
             = NULL; \
     template <> \
-    std::vector<size_t> XSS_EXPORT_SYMBOL argselect( \
-            const TYPE *arr, size_t k, size_t arrsize, bool hasnan, \
-            bool trailing_nans) \
+    std::vector<size_t> XSS_EXPORT_SYMBOL argselect(const TYPE *arr, \
+                                                    size_t k, \
+                                                    size_t arrsize, \
+                                                    bool hasnan, \
+                                                    bool trailing_nans) \
     { \
         if (internal_argselect##TYPE == NULL) { \
             CAT(resolve_argselect, TYPE)(); \
         } \
-        return (*internal_argselect##TYPE)(arr, k, arrsize, hasnan, \
-                                          trailing_nans); \
+        return (*internal_argselect##TYPE)( \
+                arr, k, arrsize, hasnan, trailing_nans); \
     }
 
 #else
@@ -182,37 +195,46 @@ namespace x86simdsort {
     static void (*internal_qsort##TYPE)(TYPE *, size_t, bool, bool, bool) \
             = NULL; \
     template <> \
-    void XSS_EXPORT_SYMBOL qsort(TYPE *arr, size_t arrsize, bool hasnan, \
-                                 bool descending, bool trailing_nans) \
+    void XSS_EXPORT_SYMBOL qsort(TYPE *arr, \
+                                 size_t arrsize, \
+                                 bool hasnan, \
+                                 bool descending, \
+                                 bool trailing_nans) \
     { \
-        (*internal_qsort##TYPE)(arr, arrsize, hasnan, descending, \
-                                trailing_nans); \
+        (*internal_qsort##TYPE)( \
+                arr, arrsize, hasnan, descending, trailing_nans); \
     }
 
 #define DECLARE_INTERNAL_qselect(TYPE) \
-    static void (*internal_qselect##TYPE)(TYPE *, size_t, size_t, bool, bool, \
-                                          bool) \
+    static void (*internal_qselect##TYPE)( \
+            TYPE *, size_t, size_t, bool, bool, bool) \
             = NULL; \
     template <> \
-    void XSS_EXPORT_SYMBOL qselect(TYPE *arr, size_t k, size_t arrsize, \
-                                   bool hasnan, bool descending, \
+    void XSS_EXPORT_SYMBOL qselect(TYPE *arr, \
+                                   size_t k, \
+                                   size_t arrsize, \
+                                   bool hasnan, \
+                                   bool descending, \
                                    bool trailing_nans) \
     { \
-        (*internal_qselect##TYPE)(arr, k, arrsize, hasnan, descending, \
-                                  trailing_nans); \
+        (*internal_qselect##TYPE)( \
+                arr, k, arrsize, hasnan, descending, trailing_nans); \
     }
 
 #define DECLARE_INTERNAL_partial_qsort(TYPE) \
-    static void (*internal_partial_qsort##TYPE)(TYPE *, size_t, size_t, bool, \
-                                                bool, bool) \
+    static void (*internal_partial_qsort##TYPE)( \
+            TYPE *, size_t, size_t, bool, bool, bool) \
             = NULL; \
     template <> \
-    void XSS_EXPORT_SYMBOL partial_qsort(TYPE *arr, size_t k, size_t arrsize, \
-                                         bool hasnan, bool descending, \
+    void XSS_EXPORT_SYMBOL partial_qsort(TYPE *arr, \
+                                         size_t k, \
+                                         size_t arrsize, \
+                                         bool hasnan, \
+                                         bool descending, \
                                          bool trailing_nans) \
     { \
-        (*internal_partial_qsort##TYPE)(arr, k, arrsize, hasnan, descending, \
-                                        trailing_nans); \
+        (*internal_partial_qsort##TYPE)( \
+                arr, k, arrsize, hasnan, descending, trailing_nans); \
     }
 
 #define DECLARE_INTERNAL_argsort(TYPE) \
@@ -220,12 +242,14 @@ namespace x86simdsort {
             const TYPE *, size_t, bool, bool, bool) \
             = NULL; \
     template <> \
-    std::vector<size_t> XSS_EXPORT_SYMBOL argsort( \
-            const TYPE *arr, size_t arrsize, bool hasnan, bool descending, \
-            bool trailing_nans) \
+    std::vector<size_t> XSS_EXPORT_SYMBOL argsort(const TYPE *arr, \
+                                                  size_t arrsize, \
+                                                  bool hasnan, \
+                                                  bool descending, \
+                                                  bool trailing_nans) \
     { \
-        return (*internal_argsort##TYPE)(arr, arrsize, hasnan, descending, \
-                                        trailing_nans); \
+        return (*internal_argsort##TYPE)( \
+                arr, arrsize, hasnan, descending, trailing_nans); \
     }
 
 #define DECLARE_INTERNAL_argselect(TYPE) \
@@ -233,12 +257,14 @@ namespace x86simdsort {
             const TYPE *, size_t, size_t, bool, bool) \
             = NULL; \
     template <> \
-    std::vector<size_t> XSS_EXPORT_SYMBOL argselect( \
-            const TYPE *arr, size_t k, size_t arrsize, bool hasnan, \
-            bool trailing_nans) \
+    std::vector<size_t> XSS_EXPORT_SYMBOL argselect(const TYPE *arr, \
+                                                    size_t k, \
+                                                    size_t arrsize, \
+                                                    bool hasnan, \
+                                                    bool trailing_nans) \
     { \
-        return (*internal_argselect##TYPE)(arr, k, arrsize, hasnan, \
-                                          trailing_nans); \
+        return (*internal_argselect##TYPE)( \
+                arr, k, arrsize, hasnan, trailing_nans); \
     }
 
 #endif // _MSC_VER

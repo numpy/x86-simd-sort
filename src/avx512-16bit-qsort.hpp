@@ -519,7 +519,6 @@ comparison_func<zmm_vector<float16>>(const uint16_t &a, const uint16_t &b)
     //return npy_half_to_float(a) < npy_half_to_float(b);
 }
 
-
 template <typename comparator>
 [[maybe_unused]] X86_SIMD_SORT_INLINE void
 avx512_qsort_fp16_helper(uint16_t *arr,
@@ -535,9 +534,9 @@ avx512_qsort_fp16_helper(uint16_t *arr,
 
     if (use_parallel) {
         int thread_count = xss_get_num_threads();
-        arrsize_t task_threshold = std::max(
-                (arrsize_t)100000,
-                (index_last_elem - index_first_elem + 1) / 100);
+        arrsize_t task_threshold
+                = std::max((arrsize_t)100000,
+                           (index_last_elem - index_first_elem + 1) / 100);
 
         // We use omp parallel and then omp single to setup the threads that will run the omp task calls in qsort_
         // The omp single prevents multiple threads from running the initial qsort_ simultaneously and causing problems
@@ -664,8 +663,7 @@ avx512_partial_qsort_fp16(uint16_t *arr,
                           bool trailing_nans = true)
 {
     if (k == 0) return;
-    avx512_qselect_fp16(arr, k - 1, arrsize, hasnan, descending,
-                        trailing_nans);
+    avx512_qselect_fp16(arr, k - 1, arrsize, hasnan, descending, trailing_nans);
     avx512_qsort_fp16(arr, k - 1, hasnan, descending, trailing_nans);
 }
 #endif // AVX512_QSORT_16BIT

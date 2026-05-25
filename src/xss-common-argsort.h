@@ -39,17 +39,18 @@ X86_SIMD_SORT_INLINE void std_argsort_withnan(const T *arr,
                                               bool trailing_nans = true,
                                               bool descending = false)
 {
-    std::sort(arg + left,
-              arg + right,
-              [arr, trailing_nans, descending](arrsize_t a, arrsize_t b) -> bool {
-                  bool a_nan = std::isnan(arr[a]);
-                  bool b_nan = std::isnan(arr[b]);
-                  if (!a_nan && !b_nan) {
-                      return descending ? arr[a] > arr[b] : arr[a] < arr[b];
-                  }
-                  if (a_nan && b_nan) { return false; }
-                  return trailing_nans ? !a_nan : a_nan;
-              });
+    std::sort(
+            arg + left,
+            arg + right,
+            [arr, trailing_nans, descending](arrsize_t a, arrsize_t b) -> bool {
+                bool a_nan = std::isnan(arr[a]);
+                bool b_nan = std::isnan(arr[b]);
+                if (!a_nan && !b_nan) {
+                    return descending ? arr[a] > arr[b] : arr[a] < arr[b];
+                }
+                if (a_nan && b_nan) { return false; }
+                return trailing_nans ? !a_nan : a_nan;
+            });
 }
 
 /* argsort using std::sort */
@@ -719,8 +720,7 @@ X86_SIMD_SORT_INLINE void xss_argselect(const T *arr,
     if (arrsize > 1) {
         if constexpr (xss::fp::is_floating_point_v<T>) {
             if ((hasnan) && (array_has_nan<vectype>(arr, arrsize))) {
-                std_argselect_withnan(
-                        arr, arg, k, 0, arrsize, trailing_nans);
+                std_argselect_withnan(arr, arg, k, 0, arrsize, trailing_nans);
                 return;
             }
         }

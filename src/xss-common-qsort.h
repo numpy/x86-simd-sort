@@ -51,7 +51,6 @@ X86_SIMD_SORT_INLINE_ONLY bool is_a_nan<uint16_t>(uint16_t elem)
     return ((elem & 0x7c00u) == 0x7c00u) && ((elem & 0x03ffu) != 0);
 }
 
-
 template <typename vtype, typename type_t>
 X86_SIMD_SORT_INLINE bool array_has_nan(const type_t *arr, arrsize_t size)
 {
@@ -77,7 +76,6 @@ X86_SIMD_SORT_INLINE bool array_has_nan(const type_t *arr, arrsize_t size)
     }
     return found_nan;
 }
-
 
 /*
  * Sort all the NAN's to end of the array and return the index of the last elem
@@ -609,7 +607,8 @@ xss_qsort(T *arr, arrsize_t arrsize, bool hasnan, bool trailing_nans = true)
         if constexpr (xss::fp::is_floating_point_v<T>) {
             if (UNLIKELY(hasnan)) {
                 if (!trailing_nans) {
-                    index_first_elem = move_nans_to_start_of_array(arr, arrsize);
+                    index_first_elem
+                            = move_nans_to_start_of_array(arr, arrsize);
                 }
                 else {
                     index_last_elem = move_nans_to_end_of_array(arr, arrsize);
@@ -622,7 +621,8 @@ xss_qsort(T *arr, arrsize_t arrsize, bool hasnan, bool trailing_nans = true)
         if (index_first_elem <= index_last_elem && index_last_elem < arrsize) {
 #ifdef XSS_COMPILE_OPENMP
 
-            bool use_parallel = (index_last_elem - index_first_elem + 1) > 100000;
+            bool use_parallel
+                    = (index_last_elem - index_first_elem + 1) > 100000;
 
             if (use_parallel) {
                 int thread_count = xss_get_num_threads();
@@ -643,11 +643,12 @@ xss_qsort(T *arr, arrsize_t arrsize, bool hasnan, bool trailing_nans = true)
 #pragma omp taskwait
             }
             else {
-                qsort_<vtype, comparator, T>(arr,
-                                             index_first_elem,
-                                             index_last_elem,
-                                             2 * (arrsize_t)log2(arrsize),
-                                             std::numeric_limits<arrsize_t>::max());
+                qsort_<vtype, comparator, T>(
+                        arr,
+                        index_first_elem,
+                        index_last_elem,
+                        2 * (arrsize_t)log2(arrsize),
+                        std::numeric_limits<arrsize_t>::max());
             }
 #else
             qsort_<vtype, comparator, T>(arr,
@@ -713,14 +714,14 @@ X86_SIMD_SORT_INLINE void xss_qselect(T *arr,
 // Partial sort methods:
 template <typename vtype, typename T, bool descending = false>
 X86_SIMD_SORT_INLINE void xss_partial_qsort(T *arr,
-                                             arrsize_t k,
-                                             arrsize_t arrsize,
-                                             bool hasnan,
-                                             bool trailing_nans = true)
+                                            arrsize_t k,
+                                            arrsize_t arrsize,
+                                            bool hasnan,
+                                            bool trailing_nans = true)
 {
     if (k == 0) return;
-    xss_qselect<vtype, T, descending>(arr, k - 1, arrsize, hasnan,
-                                      trailing_nans);
+    xss_qselect<vtype, T, descending>(
+            arr, k - 1, arrsize, hasnan, trailing_nans);
     xss_qsort<vtype, T, descending>(arr, k - 1, hasnan, trailing_nans);
 }
 
@@ -748,12 +749,10 @@ X86_SIMD_SORT_INLINE void xss_partial_qsort(T *arr,
                                             bool trailing_nans = true) \
     { \
         if (descending) { \
-            xss_qselect<VTYPE, T, true>(arr, k, size, hasnan, \
-                                        trailing_nans); \
+            xss_qselect<VTYPE, T, true>(arr, k, size, hasnan, trailing_nans); \
         } \
         else { \
-            xss_qselect<VTYPE, T, false>(arr, k, size, hasnan, \
-                                         trailing_nans); \
+            xss_qselect<VTYPE, T, false>(arr, k, size, hasnan, trailing_nans); \
         } \
     } \
     template <typename T> \
@@ -765,12 +764,12 @@ X86_SIMD_SORT_INLINE void xss_partial_qsort(T *arr,
                                                   bool trailing_nans = true) \
     { \
         if (descending) { \
-            xss_partial_qsort<VTYPE, T, true>(arr, k, size, hasnan, \
-                                              trailing_nans); \
+            xss_partial_qsort<VTYPE, T, true>( \
+                    arr, k, size, hasnan, trailing_nans); \
         } \
         else { \
-            xss_partial_qsort<VTYPE, T, false>(arr, k, size, hasnan, \
-                                               trailing_nans); \
+            xss_partial_qsort<VTYPE, T, false>( \
+                    arr, k, size, hasnan, trailing_nans); \
         } \
     }
 

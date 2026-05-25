@@ -19,9 +19,11 @@ namespace x86simdsort {
 
 // quicksort
 template <typename T>
-XSS_EXPORT_SYMBOL void
-qsort(T *arr, size_t arrsize, bool hasnan = false, bool descending = false,
-      bool trailing_nans = true);
+XSS_EXPORT_SYMBOL void qsort(T *arr,
+                             size_t arrsize,
+                             bool hasnan = false,
+                             bool descending = false,
+                             bool trailing_nans = true);
 
 // quickselect
 template <typename T>
@@ -51,9 +53,11 @@ XSS_EXPORT_SYMBOL std::vector<size_t> argsort(const T *arr,
 
 // argselect
 template <typename T>
-XSS_EXPORT_SYMBOL std::vector<size_t>
-argselect(const T *arr, size_t k, size_t arrsize, bool hasnan = false,
-          bool trailing_nans = true);
+XSS_EXPORT_SYMBOL std::vector<size_t> argselect(const T *arr,
+                                                size_t k,
+                                                size_t arrsize,
+                                                bool hasnan = false,
+                                                bool trailing_nans = true);
 
 // keyvalue sort
 template <typename T1, typename T2>
