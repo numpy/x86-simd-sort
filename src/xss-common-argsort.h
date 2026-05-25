@@ -30,25 +30,25 @@ X86_SIMD_SORT_INLINE void std_argselect_withnan(const T *arr,
                      });
 }
 
-/* argsort using std::sort */
+/* argsort using std::sort, handles NaN placement and descending order */
 template <typename T>
 X86_SIMD_SORT_INLINE void std_argsort_withnan(const T *arr,
                                               arrsize_t *arg,
                                               arrsize_t left,
-                                              arrsize_t right)
+                                              arrsize_t right,
+                                              bool trailing_nans = true,
+                                              bool descending = false)
 {
     std::sort(arg + left,
               arg + right,
-              [arr](arrsize_t left, arrsize_t right) -> bool {
-                  if ((!std::isnan(arr[left])) && (!std::isnan(arr[right]))) {
-                      return arr[left] < arr[right];
+              [arr, trailing_nans, descending](arrsize_t a, arrsize_t b) -> bool {
+                  bool a_nan = std::isnan(arr[a]);
+                  bool b_nan = std::isnan(arr[b]);
+                  if (!a_nan && !b_nan) {
+                      return descending ? arr[a] > arr[b] : arr[a] < arr[b];
                   }
-                  else if (std::isnan(arr[left])) {
-                      return false;
-                  }
-                  else {
-                      return true;
-                  }
+                  if (a_nan && b_nan) { return false; }
+                  return trailing_nans ? !a_nan : a_nan;
               });
 }
 
@@ -613,30 +613,8 @@ X86_SIMD_SORT_INLINE void xss_argsort(const T *arr,
         /* simdargsort does not work for float/double arrays with nan */
         if constexpr (xss::fp::is_floating_point_v<T>) {
             if ((hasnan) && (array_has_nan<vectype>(arr, arrsize))) {
-                std_argsort_withnan(arr, arg, 0, arrsize);
-                // std_argsort_withnan produces ascending order with NaN at end.
-                // After optional reverse, NaN is at beginning for descending.
-                if (descending) { std::reverse(arg, arg + arrsize); }
-                // Now adjust NaN position if it doesn't match trailing_nans:
-                // descending=false → NaN at end; descending=true → NaN at beginning
-                bool nan_currently_at_end = !descending;
-                if (nan_currently_at_end != trailing_nans) {
-                    arrsize_t nan_count = 0;
-                    for (arrsize_t i = 0; i < arrsize; i++) {
-                        nan_count += is_a_nan(arr[i]);
-                    }
-                    if (trailing_nans) {
-                        // NaN is at beginning, rotate to end
-                        std::rotate(arg, arg + nan_count, arg + arrsize);
-                    }
-                    else {
-                        // NaN is at end, rotate to beginning
-                        std::rotate(arg,
-                                    arg + arrsize - nan_count,
-                                    arg + arrsize);
-                    }
-                }
-
+                std_argsort_withnan(
+                        arr, arg, 0, arrsize, trailing_nans, descending);
                 return;
             }
         }
