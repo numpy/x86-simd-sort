@@ -624,6 +624,7 @@ X86_SIMD_SORT_INLINE void xss_argsort(const T *arr,
             }
         }
         UNUSED(hasnan);
+        UNUSED(trailing_nans);
 
         /* early exit for already sorted arrays: float/double with nan never reach here*/
         auto comp = descending ? Comparator<vectype, true>::STDSortComparator
@@ -731,6 +732,7 @@ X86_SIMD_SORT_INLINE void xss_argselect(const T *arr,
             }
         }
         UNUSED(hasnan);
+        UNUSED(trailing_nans);
         /* For descending, partition at the mirror position so the k-th
          * largest lands at arrsize-1-k; reversal then moves it to k. */
         arrsize_t pos = descending ? arrsize - 1 - k : k;
