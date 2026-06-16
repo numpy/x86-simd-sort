@@ -108,11 +108,11 @@ namespace x86simdsort {
                                  size_t arrsize, \
                                  bool hasnan, \
                                  bool descending, \
-                                 bool trailing_nans) \
+                                 bool nans_last) \
     { \
         if (internal_qsort##TYPE == NULL) { CAT(resolve_qsort, TYPE)(); } \
         (*internal_qsort##TYPE)( \
-                arr, arrsize, hasnan, descending, trailing_nans); \
+                arr, arrsize, hasnan, descending, nans_last); \
     }
 
 #define DECLARE_INTERNAL_qselect(TYPE) \
@@ -126,11 +126,11 @@ namespace x86simdsort {
                                    size_t arrsize, \
                                    bool hasnan, \
                                    bool descending, \
-                                   bool trailing_nans) \
+                                   bool nans_last) \
     { \
         if (internal_qselect##TYPE == NULL) { CAT(resolve_qselect, TYPE)(); } \
         (*internal_qselect##TYPE)( \
-                arr, k, arrsize, hasnan, descending, trailing_nans); \
+                arr, k, arrsize, hasnan, descending, nans_last); \
     }
 
 #define DECLARE_INTERNAL_partial_qsort(TYPE) \
@@ -144,13 +144,13 @@ namespace x86simdsort {
                                          size_t arrsize, \
                                          bool hasnan, \
                                          bool descending, \
-                                         bool trailing_nans) \
+                                         bool nans_last) \
     { \
         if (internal_partial_qsort##TYPE == NULL) { \
             CAT(resolve_partial_qsort, TYPE)(); \
         } \
         (*internal_partial_qsort##TYPE)( \
-                arr, k, arrsize, hasnan, descending, trailing_nans); \
+                arr, k, arrsize, hasnan, descending, nans_last); \
     }
 
 #define DECLARE_INTERNAL_argsort(TYPE) \
@@ -163,11 +163,11 @@ namespace x86simdsort {
                                                   size_t arrsize, \
                                                   bool hasnan, \
                                                   bool descending, \
-                                                  bool trailing_nans) \
+                                                  bool nans_last) \
     { \
         if (internal_argsort##TYPE == NULL) { CAT(resolve_argsort, TYPE)(); } \
         return (*internal_argsort##TYPE)( \
-                arr, arrsize, hasnan, descending, trailing_nans); \
+                arr, arrsize, hasnan, descending, nans_last); \
     }
 
 #define DECLARE_INTERNAL_argselect(TYPE) \
@@ -181,13 +181,13 @@ namespace x86simdsort {
                                                     size_t arrsize, \
                                                     bool hasnan, \
                                                     bool descending, \
-                                                    bool trailing_nans) \
+                                                    bool nans_last) \
     { \
         if (internal_argselect##TYPE == NULL) { \
             CAT(resolve_argselect, TYPE)(); \
         } \
         return (*internal_argselect##TYPE)( \
-                arr, k, arrsize, hasnan, descending, trailing_nans); \
+                arr, k, arrsize, hasnan, descending, nans_last); \
     }
 
 #else
@@ -200,10 +200,10 @@ namespace x86simdsort {
                                  size_t arrsize, \
                                  bool hasnan, \
                                  bool descending, \
-                                 bool trailing_nans) \
+                                 bool nans_last) \
     { \
         (*internal_qsort##TYPE)( \
-                arr, arrsize, hasnan, descending, trailing_nans); \
+                arr, arrsize, hasnan, descending, nans_last); \
     }
 
 #define DECLARE_INTERNAL_qselect(TYPE) \
@@ -216,10 +216,10 @@ namespace x86simdsort {
                                    size_t arrsize, \
                                    bool hasnan, \
                                    bool descending, \
-                                   bool trailing_nans) \
+                                   bool nans_last) \
     { \
         (*internal_qselect##TYPE)( \
-                arr, k, arrsize, hasnan, descending, trailing_nans); \
+                arr, k, arrsize, hasnan, descending, nans_last); \
     }
 
 #define DECLARE_INTERNAL_partial_qsort(TYPE) \
@@ -232,10 +232,10 @@ namespace x86simdsort {
                                          size_t arrsize, \
                                          bool hasnan, \
                                          bool descending, \
-                                         bool trailing_nans) \
+                                         bool nans_last) \
     { \
         (*internal_partial_qsort##TYPE)( \
-                arr, k, arrsize, hasnan, descending, trailing_nans); \
+                arr, k, arrsize, hasnan, descending, nans_last); \
     }
 
 #define DECLARE_INTERNAL_argsort(TYPE) \
@@ -247,10 +247,10 @@ namespace x86simdsort {
                                                   size_t arrsize, \
                                                   bool hasnan, \
                                                   bool descending, \
-                                                  bool trailing_nans) \
+                                                  bool nans_last) \
     { \
         return (*internal_argsort##TYPE)( \
-                arr, arrsize, hasnan, descending, trailing_nans); \
+                arr, arrsize, hasnan, descending, nans_last); \
     }
 
 #define DECLARE_INTERNAL_argselect(TYPE) \
@@ -263,10 +263,10 @@ namespace x86simdsort {
                                                     size_t arrsize, \
                                                     bool hasnan, \
                                                     bool descending, \
-                                                    bool trailing_nans) \
+                                                    bool nans_last) \
     { \
         return (*internal_argselect##TYPE)( \
-                arr, k, arrsize, hasnan, descending, trailing_nans); \
+                arr, k, arrsize, hasnan, descending, nans_last); \
     }
 
 #endif // _MSC_VER

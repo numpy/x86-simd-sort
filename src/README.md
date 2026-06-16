@@ -18,12 +18,12 @@ Equivalent to `qsort` in
 `std::sort` in [C++](https://en.cppreference.com/w/cpp/algorithm/sort).
 
 ```cpp
-void x86simdsortStatic::qsort<T>(T* arr, size_t arrsize, bool hasnan = false, bool descending = false, bool trailing_nans = true);
+void x86simdsortStatic::qsort<T>(T* arr, size_t arrsize, bool hasnan = false, bool descending = false, bool nans_last = true);
 ```
 Supported datatypes: `uint16_t`, `int16_t`, `_Float16`, `uint32_t`, `int32_t`,
 `float`, `uint64_t`, `int64_t` and `double`. AVX2 versions currently support
 32-bit and 64-bit dtypes only. For floating-point types, if `arr` contains
-NaNs, their placement is controlled by `trailing_nans`: `true` (default) places
+NaNs, their placement is controlled by `nans_last`: `true` (default) places
 NaNs at the end; `false` places them at the beginning. Bit-exact NaN payloads
 are preserved.
 
@@ -35,12 +35,12 @@ Equivalent to `std::nth_element` in
 
 
 ```cpp
-void x86simdsortStatic::qselect<T>(T* arr, size_t k, size_t arrsize, bool hasnan = false, bool descending = false, bool trailing_nans = true);
+void x86simdsortStatic::qselect<T>(T* arr, size_t k, size_t arrsize, bool hasnan = false, bool descending = false, bool nans_last = true);
 ```
 Supported datatypes: `uint16_t`, `int16_t`, `_Float16`, `uint32_t`, `int32_t`,
 `float`, `uint64_t`, `int64_t` and `double`. AVX2 versions currently support
 32-bit and 64-bit dtypes only. For floating-point types, if `bool hasnan` is
-set, NaN placement is controlled by `trailing_nans`: `true` (default) places
+set, NaN placement is controlled by `nans_last`: `true` (default) places
 NaNs at the end; `false` places them at the beginning. Bit-exact NaN payloads
 are preserved. If NaNs are present but `hasnan` is `false`, the behavior is
 undefined.
@@ -51,12 +51,12 @@ Equivalent to `std::partial_sort` in
 
 
 ```cpp
-void x86simdsortStatic::partial_qsort<T>(T* arr, size_t k, size_t arrsize, bool hasnan = false, bool descending = false, bool trailing_nans = true);
+void x86simdsortStatic::partial_qsort<T>(T* arr, size_t k, size_t arrsize, bool hasnan = false, bool descending = false, bool nans_last = true);
 ```
 Supported datatypes: `uint16_t`, `int16_t`, `_Float16`, `uint32_t`, `int32_t`,
 `float`, `uint64_t`, `int64_t` and `double`. AVX2 versions currently support
 32-bit and 64-bit dtypes only. For floating-point types, if `bool hasnan` is
-set, NaN placement is controlled by `trailing_nans`: `true` (default) places
+set, NaN placement is controlled by `nans_last`: `true` (default) places
 NaNs at the end; `false` places them at the beginning. Bit-exact NaN payloads
 are preserved. If NaNs are present but `hasnan` is `false`, the behavior is
 undefined.
@@ -66,7 +66,7 @@ Equivalent to `np.argsort` in
 [NumPy](https://numpy.org/doc/stable/reference/generated/numpy.argsort.html).
 
 ```cpp
-void x86simdsortStatic::argsort<T>(const T* arr, size_t *arg, size_t arrsize, bool hasnan = false, bool descending = false, bool trailing_nans = true);
+void x86simdsortStatic::argsort<T>(const T* arr, size_t *arg, size_t arrsize, bool hasnan = false, bool descending = false, bool nans_last = true);
 ```
 Supported datatypes: `uint32_t`, `int32_t`, `float`, `uint64_t`, `int64_t` and
 `double`.
@@ -78,14 +78,14 @@ Equivalent to `np.argselect` in
 [NumPy](https://numpy.org/doc/stable/reference/generated/numpy.argpartition.html).
 
 ```cpp
-void x86simdsortStatic::argselect<T>(const T* arr, size_t *arg, size_t k, size_t arrsize, bool hasnan = false, bool descending = false, bool trailing_nans = true);
+void x86simdsortStatic::argselect<T>(const T* arr, size_t *arg, size_t k, size_t arrsize, bool hasnan = false, bool descending = false, bool nans_last = true);
 ```
 Supported datatypes: `uint32_t`, `int32_t`, `float`, `uint64_t`, `int64_t` and
 `double`.
 
 When `descending=true`, the k-th element is the k-th **largest** and elements
 before index k are all greater than or equal to it. For floating-point types,
-if `bool hasnan` is set, NaN placement is controlled by `trailing_nans`:
+if `bool hasnan` is set, NaN placement is controlled by `nans_last`:
 `true` (default) places NaNs at the end; `false` places them at the beginning.
 
 The algorithm resorts to scalar `std::nth_element` if the array contains NaNs.

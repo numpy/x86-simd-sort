@@ -16,21 +16,21 @@ X86_SIMD_SORT_INLINE void std_argselect_withnan(const T *arr,
                                                 arrsize_t k,
                                                 arrsize_t left,
                                                 arrsize_t right,
-                                                bool trailing_nans = true,
+                                                bool nans_last = true,
                                                 bool descending = false)
 {
     std::nth_element(
             arg + left,
             arg + k,
             arg + right,
-            [arr, trailing_nans, descending](arrsize_t a, arrsize_t b) -> bool {
+            [arr, nans_last, descending](arrsize_t a, arrsize_t b) -> bool {
                 bool a_nan = std::isnan(arr[a]);
                 bool b_nan = std::isnan(arr[b]);
                 if (!a_nan && !b_nan) {
                     return descending ? arr[a] > arr[b] : arr[a] < arr[b];
                 }
                 if (a_nan && b_nan) { return false; }
-                return trailing_nans ? !a_nan : a_nan;
+                return nans_last ? !a_nan : a_nan;
             });
 }
 
@@ -40,20 +40,20 @@ X86_SIMD_SORT_INLINE void std_argsort_withnan(const T *arr,
                                               arrsize_t *arg,
                                               arrsize_t left,
                                               arrsize_t right,
-                                              bool trailing_nans = true,
+                                              bool nans_last = true,
                                               bool descending = false)
 {
     std::sort(
             arg + left,
             arg + right,
-            [arr, trailing_nans, descending](arrsize_t a, arrsize_t b) -> bool {
+            [arr, nans_last, descending](arrsize_t a, arrsize_t b) -> bool {
                 bool a_nan = std::isnan(arr[a]);
                 bool b_nan = std::isnan(arr[b]);
                 if (!a_nan && !b_nan) {
                     return descending ? arr[a] > arr[b] : arr[a] < arr[b];
                 }
                 if (a_nan && b_nan) { return false; }
-                return trailing_nans ? !a_nan : a_nan;
+                return nans_last ? !a_nan : a_nan;
             });
 }
 
@@ -602,7 +602,7 @@ X86_SIMD_SORT_INLINE void xss_argsort(const T *arr,
                                       arrsize_t arrsize,
                                       bool hasnan = false,
                                       bool descending = false,
-                                      bool trailing_nans = true)
+                                      bool nans_last = true)
 {
 
     using vectype = typename std::conditional<sizeof(T) == sizeof(int32_t),
@@ -619,12 +619,12 @@ X86_SIMD_SORT_INLINE void xss_argsort(const T *arr,
         if constexpr (xss::fp::is_floating_point_v<T>) {
             if ((hasnan) && (array_has_nan<vectype>(arr, arrsize))) {
                 std_argsort_withnan(
-                        arr, arg, 0, arrsize, trailing_nans, descending);
+                        arr, arg, 0, arrsize, nans_last, descending);
                 return;
             }
         }
         UNUSED(hasnan);
-        UNUSED(trailing_nans);
+        UNUSED(nans_last);
 
         /* early exit for already sorted arrays: float/double with nan never reach here*/
         auto comp = descending ? Comparator<vectype, true>::STDSortComparator
@@ -681,10 +681,10 @@ X86_SIMD_SORT_INLINE void avx512_argsort(const T *arr,
                                          arrsize_t arrsize,
                                          bool hasnan = false,
                                          bool descending = false,
-                                         bool trailing_nans = true)
+                                         bool nans_last = true)
 {
     xss_argsort<T, zmm_vector, ymm_vector>(
-            arr, arg, arrsize, hasnan, descending, trailing_nans);
+            arr, arg, arrsize, hasnan, descending, nans_last);
 }
 
 template <typename T>
@@ -693,10 +693,10 @@ X86_SIMD_SORT_INLINE void avx2_argsort(const T *arr,
                                        arrsize_t arrsize,
                                        bool hasnan = false,
                                        bool descending = false,
-                                       bool trailing_nans = true)
+                                       bool nans_last = true)
 {
     xss_argsort<T, avx2_vector, avx2_half_vector>(
-            arr, arg, arrsize, hasnan, descending, trailing_nans);
+            arr, arg, arrsize, hasnan, descending, nans_last);
 }
 
 /* argselect methods for 32-bit and 64-bit dtypes */
@@ -711,7 +711,7 @@ X86_SIMD_SORT_INLINE void xss_argselect(const T *arr,
                                         arrsize_t arrsize,
                                         bool hasnan = false,
                                         bool descending = false,
-                                        bool trailing_nans = true)
+                                        bool nans_last = true)
 {
     /* TODO optimization: on 32-bit, use full_vector for 32-bit dtype */
     using vectype = typename std::conditional<sizeof(T) == sizeof(int32_t),
@@ -727,12 +727,12 @@ X86_SIMD_SORT_INLINE void xss_argselect(const T *arr,
         if constexpr (xss::fp::is_floating_point_v<T>) {
             if ((hasnan) && (array_has_nan<vectype>(arr, arrsize))) {
                 std_argselect_withnan(
-                        arr, arg, k, 0, arrsize, trailing_nans, descending);
+                        arr, arg, k, 0, arrsize, nans_last, descending);
                 return;
             }
         }
         UNUSED(hasnan);
-        UNUSED(trailing_nans);
+        UNUSED(nans_last);
         /* For descending, partition at the mirror position so the k-th
          * largest lands at arrsize-1-k; reversal then moves it to k. */
         arrsize_t pos = descending ? arrsize - 1 - k : k;
@@ -755,10 +755,10 @@ X86_SIMD_SORT_INLINE void avx512_argselect(const T *arr,
                                            arrsize_t arrsize,
                                            bool hasnan = false,
                                            bool descending = false,
-                                           bool trailing_nans = true)
+                                           bool nans_last = true)
 {
     xss_argselect<T, zmm_vector, ymm_vector>(
-            arr, arg, k, arrsize, hasnan, descending, trailing_nans);
+            arr, arg, k, arrsize, hasnan, descending, nans_last);
 }
 
 template <typename T>
@@ -768,10 +768,10 @@ X86_SIMD_SORT_INLINE void avx2_argselect(const T *arr,
                                          arrsize_t arrsize,
                                          bool hasnan = false,
                                          bool descending = false,
-                                         bool trailing_nans = true)
+                                         bool nans_last = true)
 {
     xss_argselect<T, avx2_vector, avx2_half_vector>(
-            arr, arg, k, arrsize, hasnan, descending, trailing_nans);
+            arr, arg, k, arrsize, hasnan, descending, nans_last);
 }
 
 #endif // XSS_COMMON_ARGSORT

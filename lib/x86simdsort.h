@@ -23,7 +23,7 @@ XSS_EXPORT_SYMBOL void qsort(T *arr,
                              size_t arrsize,
                              bool hasnan = false,
                              bool descending = false,
-                             bool trailing_nans = true);
+                             bool nans_last = true);
 
 // quickselect
 template <typename T>
@@ -32,7 +32,7 @@ XSS_EXPORT_SYMBOL void qselect(T *arr,
                                size_t arrsize,
                                bool hasnan = false,
                                bool descending = false,
-                               bool trailing_nans = true);
+                               bool nans_last = true);
 
 // partial sort
 template <typename T>
@@ -41,7 +41,7 @@ XSS_EXPORT_SYMBOL void partial_qsort(T *arr,
                                      size_t arrsize,
                                      bool hasnan = false,
                                      bool descending = false,
-                                     bool trailing_nans = true);
+                                     bool nans_last = true);
 
 // argsort
 template <typename T>
@@ -49,7 +49,7 @@ XSS_EXPORT_SYMBOL std::vector<size_t> argsort(const T *arr,
                                               size_t arrsize,
                                               bool hasnan = false,
                                               bool descending = false,
-                                              bool trailing_nans = true);
+                                              bool nans_last = true);
 
 // argselect
 template <typename T>
@@ -58,7 +58,7 @@ XSS_EXPORT_SYMBOL std::vector<size_t> argselect(const T *arr,
                                                 size_t arrsize,
                                                 bool hasnan = false,
                                                 bool descending = false,
-                                                bool trailing_nans = true);
+                                                bool nans_last = true);
 
 // keyvalue sort
 template <typename T1, typename T2>

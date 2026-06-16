@@ -9,9 +9,9 @@ namespace fp16_spr {
                size_t size,
                bool hasnan,
                bool descending,
-               bool trailing_nans)
+               bool nans_last)
     {
-        x86simdsortStatic::qsort(arr, size, hasnan, descending, trailing_nans);
+        x86simdsortStatic::qsort(arr, size, hasnan, descending, nans_last);
     }
     template <>
     void qselect(_Float16 *arr,
@@ -19,10 +19,10 @@ namespace fp16_spr {
                  size_t arrsize,
                  bool hasnan,
                  bool descending,
-                 bool trailing_nans)
+                 bool nans_last)
     {
         x86simdsortStatic::qselect(
-                arr, k, arrsize, hasnan, descending, trailing_nans);
+                arr, k, arrsize, hasnan, descending, nans_last);
     }
     template <>
     void partial_qsort(_Float16 *arr,
@@ -30,10 +30,10 @@ namespace fp16_spr {
                        size_t arrsize,
                        bool hasnan,
                        bool descending,
-                       bool trailing_nans)
+                       bool nans_last)
     {
         x86simdsortStatic::partial_qsort(
-                arr, k, arrsize, hasnan, descending, trailing_nans);
+                arr, k, arrsize, hasnan, descending, nans_last);
     }
 } // namespace fp16_spr
 } // namespace xss

@@ -571,7 +571,7 @@ avx512_qsort_fp16(uint16_t *arr,
                   arrsize_t arrsize,
                   bool hasnan = false,
                   bool descending = false,
-                  bool trailing_nans = true)
+                  bool nans_last = true)
 {
     using vtype = zmm_vector<float16>;
 
@@ -579,7 +579,7 @@ avx512_qsort_fp16(uint16_t *arr,
         arrsize_t index_first_elem = 0;
         arrsize_t index_last_elem = arrsize - 1;
         if (UNLIKELY(hasnan)) {
-            if (!trailing_nans) {
+            if (!nans_last) {
                 index_first_elem = move_nans_to_start_of_array(arr, arrsize);
             }
             else {
@@ -610,7 +610,7 @@ avx512_qselect_fp16(uint16_t *arr,
                     arrsize_t arrsize,
                     bool hasnan = false,
                     bool descending = false,
-                    bool trailing_nans = true)
+                    bool nans_last = true)
 {
     using vtype = zmm_vector<float16>;
 
@@ -621,7 +621,7 @@ avx512_qselect_fp16(uint16_t *arr,
     arrsize_t index_last_elem = arrsize - 1;
 
     if (UNLIKELY(hasnan)) {
-        if (!trailing_nans) {
+        if (!nans_last) {
             index_first_elem = move_nans_to_start_of_array(arr, arrsize);
         }
         else {
@@ -660,10 +660,10 @@ avx512_partial_qsort_fp16(uint16_t *arr,
                           arrsize_t arrsize,
                           bool hasnan = false,
                           bool descending = false,
-                          bool trailing_nans = true)
+                          bool nans_last = true)
 {
     if (k == 0) return;
-    avx512_qselect_fp16(arr, k - 1, arrsize, hasnan, descending, trailing_nans);
-    avx512_qsort_fp16(arr, k - 1, hasnan, descending, trailing_nans);
+    avx512_qselect_fp16(arr, k - 1, arrsize, hasnan, descending, nans_last);
+    avx512_qsort_fp16(arr, k - 1, hasnan, descending, nans_last);
 }
 #endif // AVX512_QSORT_16BIT

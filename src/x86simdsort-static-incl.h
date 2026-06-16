@@ -11,7 +11,7 @@ X86_SIMD_SORT_FINLINE void qsort(T *arr,
                                  size_t size,
                                  bool hasnan = false,
                                  bool descending = false,
-                                 bool trailing_nans = true);
+                                 bool nans_last = true);
 
 template <typename T>
 X86_SIMD_SORT_FINLINE void qselect(T *arr,
@@ -19,7 +19,7 @@ X86_SIMD_SORT_FINLINE void qselect(T *arr,
                                    size_t size,
                                    bool hasnan = false,
                                    bool descending = false,
-                                   bool trailing_nans = true);
+                                   bool nans_last = true);
 
 template <typename T>
 X86_SIMD_SORT_FINLINE void partial_qsort(T *arr,
@@ -27,14 +27,14 @@ X86_SIMD_SORT_FINLINE void partial_qsort(T *arr,
                                          size_t size,
                                          bool hasnan = false,
                                          bool descending = false,
-                                         bool trailing_nans = true);
+                                         bool nans_last = true);
 
 template <typename T>
 X86_SIMD_SORT_FINLINE std::vector<size_t> argsort(const T *arr,
                                                   size_t size,
                                                   bool hasnan = false,
                                                   bool descending = false,
-                                                  bool trailing_nans = true);
+                                                  bool nans_last = true);
 
 /* argsort API required by NumPy: */
 template <typename T>
@@ -43,7 +43,7 @@ X86_SIMD_SORT_FINLINE void argsort(const T *arr,
                                    size_t size,
                                    bool hasnan = false,
                                    bool descending = false,
-                                   bool trailing_nans = true);
+                                   bool nans_last = true);
 
 template <typename T>
 X86_SIMD_SORT_FINLINE std::vector<size_t> argselect(const T *arr,
@@ -51,7 +51,7 @@ X86_SIMD_SORT_FINLINE std::vector<size_t> argselect(const T *arr,
                                                     size_t size,
                                                     bool hasnan = false,
                                                     bool descending = false,
-                                                    bool trailing_nans = true);
+                                                    bool nans_last = true);
 
 /* argselect API required by NumPy: */
 template <typename T>
@@ -61,7 +61,7 @@ void X86_SIMD_SORT_FINLINE argselect(const T *arr,
                                      size_t size,
                                      bool hasnan = false,
                                      bool descending = false,
-                                     bool trailing_nans = true);
+                                     bool nans_last = true);
 
 template <typename T1, typename T2>
 X86_SIMD_SORT_FINLINE void keyvalue_qsort(T1 *key,
@@ -94,9 +94,9 @@ X86_SIMD_SORT_FINLINE void keyvalue_partial_sort(T1 *key,
                                                         size_t size, \
                                                         bool hasnan, \
                                                         bool descending, \
-                                                        bool trailing_nans) \
+                                                        bool nans_last) \
     { \
-        ISA##_qsort(arr, size, hasnan, descending, trailing_nans); \
+        ISA##_qsort(arr, size, hasnan, descending, nans_last); \
     } \
     template <typename T> \
     X86_SIMD_SORT_FINLINE void x86simdsortStatic::qselect(T *arr, \
@@ -104,9 +104,9 @@ X86_SIMD_SORT_FINLINE void keyvalue_partial_sort(T1 *key,
                                                           size_t size, \
                                                           bool hasnan, \
                                                           bool descending, \
-                                                          bool trailing_nans) \
+                                                          bool nans_last) \
     { \
-        ISA##_qselect(arr, k, size, hasnan, descending, trailing_nans); \
+        ISA##_qselect(arr, k, size, hasnan, descending, nans_last); \
     } \
     template <typename T> \
     X86_SIMD_SORT_FINLINE void x86simdsortStatic::partial_qsort( \
@@ -115,9 +115,9 @@ X86_SIMD_SORT_FINLINE void keyvalue_partial_sort(T1 *key,
             size_t size, \
             bool hasnan, \
             bool descending, \
-            bool trailing_nans) \
+            bool nans_last) \
     { \
-        ISA##_partial_qsort(arr, k, size, hasnan, descending, trailing_nans); \
+        ISA##_partial_qsort(arr, k, size, hasnan, descending, nans_last); \
     } \
     template <typename T> \
     X86_SIMD_SORT_FINLINE void x86simdsortStatic::argsort(const T *arr, \
@@ -125,9 +125,9 @@ X86_SIMD_SORT_FINLINE void keyvalue_partial_sort(T1 *key,
                                                           size_t size, \
                                                           bool hasnan, \
                                                           bool descending, \
-                                                          bool trailing_nans) \
+                                                          bool nans_last) \
     { \
-        ISA##_argsort(arr, arg, size, hasnan, descending, trailing_nans); \
+        ISA##_argsort(arr, arg, size, hasnan, descending, nans_last); \
     } \
     template <typename T> \
     X86_SIMD_SORT_FINLINE std::vector<size_t> x86simdsortStatic::argsort( \
@@ -135,12 +135,12 @@ X86_SIMD_SORT_FINLINE void keyvalue_partial_sort(T1 *key,
             size_t size, \
             bool hasnan, \
             bool descending, \
-            bool trailing_nans) \
+            bool nans_last) \
     { \
         std::vector<size_t> indices(size); \
         std::iota(indices.begin(), indices.end(), 0); \
         x86simdsortStatic::argsort( \
-                arr, indices.data(), size, hasnan, descending, trailing_nans); \
+                arr, indices.data(), size, hasnan, descending, nans_last); \
         return indices; \
     } \
     template <typename T> \
@@ -151,9 +151,9 @@ X86_SIMD_SORT_FINLINE void keyvalue_partial_sort(T1 *key,
             size_t size, \
             bool hasnan, \
             bool descending, \
-            bool trailing_nans) \
+            bool nans_last) \
     { \
-        ISA##_argselect(arr, arg, k, size, hasnan, descending, trailing_nans); \
+        ISA##_argselect(arr, arg, k, size, hasnan, descending, nans_last); \
     } \
     template <typename T> \
     X86_SIMD_SORT_FINLINE std::vector<size_t> x86simdsortStatic::argselect( \
@@ -162,7 +162,7 @@ X86_SIMD_SORT_FINLINE void keyvalue_partial_sort(T1 *key,
             size_t size, \
             bool hasnan, \
             bool descending, \
-            bool trailing_nans) \
+            bool nans_last) \
     { \
         std::vector<size_t> indices(size); \
         std::iota(indices.begin(), indices.end(), 0); \
@@ -172,7 +172,7 @@ X86_SIMD_SORT_FINLINE void keyvalue_partial_sort(T1 *key,
                                      size, \
                                      hasnan, \
                                      descending, \
-                                     trailing_nans); \
+                                     nans_last); \
         return indices; \
     } \
     template <typename T1, typename T2> \
@@ -236,9 +236,9 @@ void x86simdsortStatic::qsort<_Float16>(_Float16 *arr,
                                         size_t size,
                                         bool hasnan,
                                         bool descending,
-                                        bool trailing_nans)
+                                        bool nans_last)
 {
-    avx512_qsort_fp16((uint16_t *)arr, size, hasnan, descending, trailing_nans);
+    avx512_qsort_fp16((uint16_t *)arr, size, hasnan, descending, nans_last);
 }
 template <>
 [[maybe_unused]]
@@ -247,10 +247,10 @@ void x86simdsortStatic::qselect<_Float16>(_Float16 *arr,
                                           size_t size,
                                           bool hasnan,
                                           bool descending,
-                                          bool trailing_nans)
+                                          bool nans_last)
 {
     avx512_qselect_fp16(
-            (uint16_t *)arr, k, size, hasnan, descending, trailing_nans);
+            (uint16_t *)arr, k, size, hasnan, descending, nans_last);
 }
 template <>
 [[maybe_unused]]
@@ -259,10 +259,10 @@ void x86simdsortStatic::partial_qsort<_Float16>(_Float16 *arr,
                                                 size_t size,
                                                 bool hasnan,
                                                 bool descending,
-                                                bool trailing_nans)
+                                                bool nans_last)
 {
     avx512_partial_qsort_fp16(
-            (uint16_t *)arr, k, size, hasnan, descending, trailing_nans);
+            (uint16_t *)arr, k, size, hasnan, descending, nans_last);
 }
 #endif
 

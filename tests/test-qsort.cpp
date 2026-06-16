@@ -128,7 +128,7 @@ TYPED_TEST_P(simdsort, test_argsort_descending)
     }
 }
 
-TYPED_TEST_P(simdsort, test_argsort_trailing_nans)
+TYPED_TEST_P(simdsort, test_argsort_nans_last)
 {
     if constexpr (xss::fp::is_floating_point_v<TypeParam>) {
         std::vector<std::string> nan_types
@@ -269,7 +269,7 @@ TYPED_TEST_P(simdsort, test_qselect_descending)
     }
 }
 
-TYPED_TEST_P(simdsort, test_qselect_trailing_nans)
+TYPED_TEST_P(simdsort, test_qselect_nans_last)
 {
     if constexpr (xss::fp::is_floating_point_v<TypeParam>) {
         std::vector<std::string> nan_types
@@ -417,7 +417,7 @@ TYPED_TEST_P(simdsort, test_argselect_descending)
     }
 }
 
-TYPED_TEST_P(simdsort, test_argselect_trailing_nans)
+TYPED_TEST_P(simdsort, test_argselect_nans_last)
 {
     if constexpr (xss::fp::is_floating_point_v<TypeParam>) {
         std::vector<std::string> nan_types
@@ -600,7 +600,7 @@ TYPED_TEST_P(simdsort, test_comparator)
     }
 }
 
-TYPED_TEST_P(simdsort, test_qsort_trailing_nans)
+TYPED_TEST_P(simdsort, test_qsort_nans_last)
 {
     if constexpr (xss::fp::is_floating_point_v<TypeParam>) {
         std::vector<std::string> nan_types
@@ -689,19 +689,19 @@ TYPED_TEST_P(simdsort, test_qsort_leading_nans)
 REGISTER_TYPED_TEST_SUITE_P(simdsort,
                             test_qsort_ascending,
                             test_qsort_descending,
-                            test_qsort_trailing_nans,
+                            test_qsort_nans_last,
                             test_qsort_leading_nans,
                             test_argsort_ascending,
                             test_argsort_descending,
-                            test_argsort_trailing_nans,
+                            test_argsort_nans_last,
                             test_argsort_leading_nans,
                             test_argselect_ascending,
                             test_argselect_descending,
-                            test_argselect_trailing_nans,
+                            test_argselect_nans_last,
                             test_argselect_leading_nans,
                             test_qselect_ascending,
                             test_qselect_descending,
-                            test_qselect_trailing_nans,
+                            test_qselect_nans_last,
                             test_qselect_leading_nans,
                             test_partial_qsort_ascending,
                             test_partial_qsort_descending,

@@ -25,11 +25,11 @@ namespace utils {
     }
     template <typename T>
     decltype(auto)
-    get_cmp_func(bool hasnan, bool reverse, bool trailing_nans = true)
+    get_cmp_func(bool hasnan, bool reverse, bool nans_last = true)
     {
         std::function<bool(T, T)> cmp;
         if (hasnan) {
-            if (trailing_nans) {
+            if (nans_last) {
                 if (reverse == true) {
                     cmp = compare_nan_end<T, std::greater<T>>();
                 }
@@ -60,11 +60,11 @@ namespace scalar {
                size_t arrsize,
                bool hasnan,
                bool reversed,
-               bool trailing_nans)
+               bool nans_last)
     {
         std::sort(arr,
                   arr + arrsize,
-                  xss::utils::get_cmp_func<T>(hasnan, reversed, trailing_nans));
+                  xss::utils::get_cmp_func<T>(hasnan, reversed, nans_last));
     }
 
     template <typename T>
@@ -73,13 +73,13 @@ namespace scalar {
                  size_t arrsize,
                  bool hasnan,
                  bool reversed,
-                 bool trailing_nans)
+                 bool nans_last)
     {
         std::nth_element(
                 arr,
                 arr + k,
                 arr + arrsize,
-                xss::utils::get_cmp_func<T>(hasnan, reversed, trailing_nans));
+                xss::utils::get_cmp_func<T>(hasnan, reversed, nans_last));
     }
     template <typename T>
     void partial_qsort(T *arr,
@@ -87,25 +87,25 @@ namespace scalar {
                        size_t arrsize,
                        bool hasnan,
                        bool reversed,
-                       bool trailing_nans)
+                       bool nans_last)
     {
         std::partial_sort(
                 arr,
                 arr + k,
                 arr + arrsize,
-                xss::utils::get_cmp_func<T>(hasnan, reversed, trailing_nans));
+                xss::utils::get_cmp_func<T>(hasnan, reversed, nans_last));
     }
     template <typename T>
     std::vector<size_t> argsort(const T *arr,
                                 size_t arrsize,
                                 bool hasnan,
                                 bool reversed,
-                                bool trailing_nans)
+                                bool nans_last)
     {
         UNUSED(hasnan);
         std::vector<size_t> arg(arrsize);
         std::iota(arg.begin(), arg.end(), 0);
-        if (trailing_nans) {
+        if (nans_last) {
             if (reversed) {
                 std::sort(arg.begin(),
                           arg.end(),
@@ -137,13 +137,13 @@ namespace scalar {
                                   size_t arrsize,
                                   bool hasnan,
                                   bool descending,
-                                  bool trailing_nans)
+                                  bool nans_last)
     {
         UNUSED(hasnan);
         std::vector<size_t> arg(arrsize);
         std::iota(arg.begin(), arg.end(), 0);
         std::function<bool(size_t, size_t)> cmp;
-        if (trailing_nans) {
+        if (nans_last) {
             if (descending) {
                 cmp = compare_arg_nan_end<T, std::greater<T>>(arr);
             }
