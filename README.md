@@ -1,4 +1,4 @@
-# x86-simd-sort
+# x86-simd-sort [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/numpy/x86-simd-sort)
 
 C++ template library for high performance SIMD based sorting routines for
 built-in integers and floats (16-bit, 32-bit and 64-bit data types) and custom
