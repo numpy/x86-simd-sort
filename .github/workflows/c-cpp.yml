@@ -228,17 +228,21 @@ jobs:
     steps:
     - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
-    - name: Install Intel oneAPI repository
+    - name: Install Intel oneAPI repository and dependencies
       run: |
         echo "deb https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
         sudo add-apt-repository -y "deb https://apt.repos.intel.com/oneapi all main"
+        sudo apt update --allow-insecure-repositories
+        sudo apt --allow-unauthenticated -y install intel-oneapi-compiler-dpcpp-cpp libgtest-dev wget git python3-pip meson
 
-    - name: Setup build environment
-      uses: ./.github/actions/setup-build-env
+    - name: Setup Intel SDE
+      uses: petarpetrovt/setup-sde@31aa4a8e85e109bef00f1d838613fcc6ec421271 # v5.0
       with:
-        compiler: intel-oneapi-compiler-dpcpp-cpp
-        extra-packages: python3-pip
-        setup-sde: 'true'
+        environmentVariableName: SDE_PATH
+        sdeVersion: 9.58.0
+
+    - name: Add Intel SDE to PATH
+      run: echo "$SDE_PATH" >> "$GITHUB_PATH"
 
     - name: Build
       uses: ./.github/actions/meson-build
