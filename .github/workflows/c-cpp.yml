@@ -69,11 +69,14 @@ jobs:
         sudo apt update
         sudo apt -y install g++-9 libgtest-dev meson wget git
 
-    - name: Install Intel SDE
-      run: |
-        wget -O /tmp/sde.tar.xz https://downloadmirror.intel.com/915934/sde-external-10.8.0-2026-03-15-lin.tar.xz
-        mkdir /tmp/sde && tar -xvf /tmp/sde.tar.xz -C /tmp/sde/
-        sudo mv /tmp/sde/* /opt/sde && sudo ln -s /opt/sde/sde64 /usr/bin/sde
+    - name: Setup Intel SDE
+      uses: petarpetrovt/setup-sde@31aa4a8e85e109bef00f1d838613fcc6ec421271 # v5.0
+      with:
+        environmentVariableName: SDE_PATH
+        sdeVersion: 9.58.0
+
+    - name: Add Intel SDE to PATH
+      run: echo "$SDE_PATH" >> "$GITHUB_PATH"
 
     - name: Build
       env:
@@ -99,11 +102,14 @@ jobs:
         sudo apt update
         sudo apt -y install g++-10 libgtest-dev meson wget git
 
-    - name: Install Intel SDE
-      run: |
-        wget -O /tmp/sde.tar.xz https://downloadmirror.intel.com/915934/sde-external-10.8.0-2026-03-15-lin.tar.xz
-        mkdir /tmp/sde && tar -xvf /tmp/sde.tar.xz -C /tmp/sde/
-        sudo mv /tmp/sde/* /opt/sde && sudo ln -s /opt/sde/sde64 /usr/bin/sde
+    - name: Setup Intel SDE
+      uses: petarpetrovt/setup-sde@31aa4a8e85e109bef00f1d838613fcc6ec421271 # v5.0
+      with:
+        environmentVariableName: SDE_PATH
+        sdeVersion: 9.58.0
+
+    - name: Add Intel SDE to PATH
+      run: echo "$SDE_PATH" >> "$GITHUB_PATH"
 
     - name: Build
       env:
@@ -129,11 +135,14 @@ jobs:
         sudo apt update
         sudo apt -y install g++-11 libgtest-dev meson wget git
 
-    - name: Install Intel SDE
-      run: |
-        wget -O /tmp/sde.tar.xz https://downloadmirror.intel.com/915934/sde-external-10.8.0-2026-03-15-lin.tar.xz
-        mkdir /tmp/sde && tar -xvf /tmp/sde.tar.xz -C /tmp/sde/
-        sudo mv /tmp/sde/* /opt/sde && sudo ln -s /opt/sde/sde64 /usr/bin/sde
+    - name: Setup Intel SDE
+      uses: petarpetrovt/setup-sde@31aa4a8e85e109bef00f1d838613fcc6ec421271 # v5.0
+      with:
+        environmentVariableName: SDE_PATH
+        sdeVersion: 9.58.0
+
+    - name: Add Intel SDE to PATH
+      run: echo "$SDE_PATH" >> "$GITHUB_PATH"
 
     - name: Build
       env:
@@ -158,11 +167,14 @@ jobs:
         sudo apt update
         sudo apt -y install g++-13 libgtest-dev meson wget git
 
-    - name: Install Intel SDE
-      run: |
-        wget -O /tmp/sde.tar.xz https://downloadmirror.intel.com/915934/sde-external-10.8.0-2026-03-15-lin.tar.xz
-        mkdir /tmp/sde && tar -xvf /tmp/sde.tar.xz -C /tmp/sde/
-        sudo mv /tmp/sde/* /opt/sde && sudo ln -s /opt/sde/sde64 /usr/bin/sde
+    - name: Setup Intel SDE
+      uses: petarpetrovt/setup-sde@31aa4a8e85e109bef00f1d838613fcc6ec421271 # v5.0
+      with:
+        environmentVariableName: SDE_PATH
+        sdeVersion: 9.58.0
+
+    - name: Add Intel SDE to PATH
+      run: echo "$SDE_PATH" >> "$GITHUB_PATH"
 
     - name: Build examples
       env:
@@ -195,11 +207,14 @@ jobs:
         sudo apt update
         sudo apt -y install clang-18 libomp-18-dev libgtest-dev meson wget git
 
-    - name: Install Intel SDE
-      run: |
-        wget -O /tmp/sde.tar.xz https://downloadmirror.intel.com/915934/sde-external-10.8.0-2026-03-15-lin.tar.xz
-        mkdir /tmp/sde && tar -xvf /tmp/sde.tar.xz -C /tmp/sde/
-        sudo mv /tmp/sde/* /opt/sde && sudo ln -s /opt/sde/sde64 /usr/bin/sde
+    - name: Setup Intel SDE
+      uses: petarpetrovt/setup-sde@31aa4a8e85e109bef00f1d838613fcc6ec421271 # v5.0
+      with:
+        environmentVariableName: SDE_PATH
+        sdeVersion: 9.58.0
+
+    - name: Add Intel SDE to PATH
+      run: echo "$SDE_PATH" >> "$GITHUB_PATH"
 
     - name: Build examples
       env:
@@ -233,11 +248,14 @@ jobs:
         sudo apt update
         sudo apt -y install g++-10 libgtest-dev meson wget git
 
-    - name: Install Intel SDE
-      run: |
-        wget -O /tmp/sde.tar.xz https://downloadmirror.intel.com/915934/sde-external-10.8.0-2026-03-15-lin.tar.xz
-        mkdir /tmp/sde && tar -xvf /tmp/sde.tar.xz -C /tmp/sde/
-        sudo mv /tmp/sde/* /opt/sde && sudo ln -s /opt/sde/sde64 /usr/bin/sde
+    - name: Setup Intel SDE
+      uses: petarpetrovt/setup-sde@31aa4a8e85e109bef00f1d838613fcc6ec421271 # v5.0
+      with:
+        environmentVariableName: SDE_PATH
+        sdeVersion: 9.58.0
+
+    - name: Add Intel SDE to PATH
+      run: echo "$SDE_PATH" >> "$GITHUB_PATH"
 
     - name: Build
       env:
@@ -265,11 +283,14 @@ jobs:
         sudo apt update
         sudo apt -y install g++-13 libgtest-dev meson wget git
 
-    - name: Install Intel SDE
-      run: |
-        wget -O /tmp/sde.tar.xz https://downloadmirror.intel.com/915934/sde-external-10.8.0-2026-03-15-lin.tar.xz
-        mkdir /tmp/sde && tar -xvf /tmp/sde.tar.xz -C /tmp/sde/
-        sudo mv /tmp/sde/* /opt/sde && sudo ln -s /opt/sde/sde64 /usr/bin/sde
+    - name: Setup Intel SDE
+      uses: petarpetrovt/setup-sde@31aa4a8e85e109bef00f1d838613fcc6ec421271 # v5.0
+      with:
+        environmentVariableName: SDE_PATH
+        sdeVersion: 9.58.0
+
+    - name: Add Intel SDE to PATH
+      run: echo "$SDE_PATH" >> "$GITHUB_PATH"
 
     - name: Build
       env:
@@ -314,13 +335,14 @@ jobs:
         sudo apt update --allow-insecure-repositories
         sudo apt --allow-unauthenticated -y install intel-oneapi-compiler-dpcpp-cpp libgtest-dev wget git python3-pip meson
 
-    - name: Install Intel SDE
-      run: |
-        #INTEL_SDE_URL=$(wget -s https://www.intel.com/content/www/us/en/download/684897/813591/intel-software-development-emulator.html | grep -Po 'https://downloadmirror.intel.com/.*lin.tar.xz(?=")')
-        #wget -O /tmp/sde.tar.xz $INTEL_SDE_URL
-        wget -O /tmp/sde.tar.xz https://downloadmirror.intel.com/915934/sde-external-10.8.0-2026-03-15-lin.tar.xz
-        mkdir /tmp/sde && tar -xvf /tmp/sde.tar.xz -C /tmp/sde/
-        sudo mv /tmp/sde/* /opt/sde && sudo ln -s /opt/sde/sde64 /usr/bin/sde
+    - name: Setup Intel SDE
+      uses: petarpetrovt/setup-sde@31aa4a8e85e109bef00f1d838613fcc6ec421271 # v5.0
+      with:
+        environmentVariableName: SDE_PATH
+        sdeVersion: 9.58.0
+
+    - name: Add Intel SDE to PATH
+      run: echo "$SDE_PATH" >> "$GITHUB_PATH"
 
     - name: Build examples
       env:

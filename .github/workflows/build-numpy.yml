@@ -45,11 +45,14 @@ jobs:
       with:
         python-version: '3.12'
 
-    - name: Install Intel SDE
-      run: |
-        wget -O /tmp/sde.tar.xz https://downloadmirror.intel.com/915934/sde-external-10.8.0-2026-03-15-lin.tar.xz
-        mkdir /tmp/sde && tar -xvf /tmp/sde.tar.xz -C /tmp/sde/
-        sudo mv /tmp/sde/* /opt/sde && sudo ln -s /opt/sde/sde64 /usr/bin/sde
+    - name: Setup Intel SDE
+      uses: petarpetrovt/setup-sde@31aa4a8e85e109bef00f1d838613fcc6ec421271 # v5.0
+      with:
+        environmentVariableName: SDE_PATH
+        sdeVersion: 9.58.0
+
+    - name: Add Intel SDE to PATH
+      run: echo "$SDE_PATH" >> "$GITHUB_PATH"
 
     - name: Install NumPy dependencies
       working-directory: ${{ github.workspace }}/numpy
@@ -98,11 +101,14 @@ jobs:
         sudo apt update
         sudo apt -y install g++-12 gcc-12 git
 
-    - name: Install Intel SDE
-      run: |
-        wget -O /tmp/sde.tar.xz https://downloadmirror.intel.com/915934/sde-external-10.8.0-2026-03-15-lin.tar.xz
-        mkdir /tmp/sde && tar -xvf /tmp/sde.tar.xz -C /tmp/sde/
-        sudo mv /tmp/sde/* /opt/sde && sudo ln -s /opt/sde/sde64 /usr/bin/sde
+    - name: Setup Intel SDE
+      uses: petarpetrovt/setup-sde@31aa4a8e85e109bef00f1d838613fcc6ec421271 # v5.0
+      with:
+        environmentVariableName: SDE_PATH
+        sdeVersion: 9.58.0
+
+    - name: Add Intel SDE to PATH
+      run: echo "$SDE_PATH" >> "$GITHUB_PATH"
 
     - name: Checkout NumPy main
       uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
