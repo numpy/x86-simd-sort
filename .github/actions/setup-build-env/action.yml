@@ -1,0 +1,40 @@
+name: 'Setup Build Environment'
+description: 'Common setup for building and testing x86-simd-sort'
+
+inputs:
+  compiler:
+    description: 'Compiler to install (e.g., g++-9, clang-18)'
+    required: true
+  extra-packages:
+    description: 'Additional apt packages to install'
+    required: false
+    default: ''
+  setup-sde:
+    description: 'Whether to setup Intel SDE'
+    required: false
+    default: 'true'
+  sde-version:
+    description: 'Intel SDE version to install'
+    required: false
+    default: '9.58.0'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install dependencies
+      shell: bash
+      run: |
+        sudo apt update
+        sudo apt -y install ${{ inputs.compiler }} libgtest-dev meson wget git ${{ inputs.extra-packages }}
+
+    - name: Setup Intel SDE
+      if: inputs.setup-sde == 'true'
+      uses: petarpetrovt/setup-sde@31aa4a8e85e109bef00f1d838613fcc6ec421271 # v5.0
+      with:
+        environmentVariableName: SDE_PATH
+        sdeVersion: ${{ inputs.sde-version }}
+
+    - name: Add Intel SDE to PATH
+      if: inputs.setup-sde == 'true'
+      shell: bash
+      run: echo "$SDE_PATH" >> "$GITHUB_PATH"

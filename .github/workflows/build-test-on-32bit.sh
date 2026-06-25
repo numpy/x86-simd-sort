@@ -15,7 +15,7 @@ cmake .. -DBUILD_GMOCK=OFF
 make install
 
 ## Install Intel SDE
-curl -o /tmp/sde.tar.xz https://downloadmirror.intel.com/859732/sde-external-9.58.0-2025-06-16-lin.tar.xz
+wget -O /tmp/sde.tar.xz https://downloadmirror.intel.com/915934/sde-external-10.8.0-2026-03-15-lin.tar.xz
 mkdir /tmp/sde && tar -xvf /tmp/sde.tar.xz -C /tmp/sde/
 mv /tmp/sde/* /opt/sde && ln -s /opt/sde/sde /usr/bin/sde
 

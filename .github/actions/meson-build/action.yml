@@ -1,0 +1,49 @@
+name: 'Meson Build'
+description: 'Build project using Meson and Ninja'
+
+inputs:
+  compiler:
+    description: 'C++ compiler to use (e.g., g++-9, clang++-18, icpx)'
+    required: true
+  meson-options:
+    description: 'Additional Meson options'
+    required: false
+    default: '-Dbuild_tests=true --warnlevel 2 --werror --buildtype release'
+  cxxflags:
+    description: 'Additional CXXFLAGS'
+    required: false
+    default: ''
+  build-examples:
+    description: 'Whether to build examples first'
+    required: false
+    default: 'false'
+  pre-build-commands:
+    description: 'Commands to run before build (e.g., source environment)'
+    required: false
+    default: ''
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Build examples
+      if: inputs.build-examples == 'true'
+      shell: bash
+      env:
+        CXX: ${{ inputs.compiler }}
+        CXXFLAGS: ${{ inputs.cxxflags }}
+      run: |
+        ${{ inputs.pre-build-commands }}
+        cd examples
+        make all
+
+    - name: Build with Meson
+      shell: bash
+      env:
+        CXX: ${{ inputs.compiler }}
+        CXXFLAGS: ${{ inputs.cxxflags }}
+      run: |
+        ${{ inputs.pre-build-commands }}
+        make clean
+        meson setup ${{ inputs.meson-options }} builddir
+        cd builddir
+        ninja
