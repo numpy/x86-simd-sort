@@ -641,8 +641,9 @@ X86_SIMD_SORT_INLINE void xss_qsort_kv(
 #endif
 
         if (descending) {
-            std::reverse(keys, keys + arrsize);
-            std::reverse(indexes, indexes + arrsize);
+            // Only reverse the real portion; NaN at the end stays in place
+            std::reverse(keys, keys + index_last_elem + 1);
+            std::reverse(indexes, indexes + index_last_elem + 1);
         }
     }
 
@@ -688,8 +689,6 @@ X86_SIMD_SORT_INLINE void xss_select_kv(T1 *keys,
 #endif // XSS_TEST_KEYVALUE_BASE_CASE
 
     if (minarrsize) {
-        if (descending) { k = arrsize - 1 - k; }
-
         arrsize_t index_last_elem = arrsize - 1;
         if constexpr (xss::fp::is_floating_point_v<T1>) {
             if (UNLIKELY(hasnan)) {
@@ -699,6 +698,9 @@ X86_SIMD_SORT_INLINE void xss_select_kv(T1 *keys,
             }
         }
 
+        // For descending: map k to ascending position within real portion
+        if (descending) { k = index_last_elem - k; }
+
         UNUSED(hasnan);
         if (index_last_elem >= k) {
             kvselect_<keytype, valtype>(
@@ -706,8 +708,9 @@ X86_SIMD_SORT_INLINE void xss_select_kv(T1 *keys,
         }
 
         if (descending) {
-            std::reverse(keys, keys + arrsize);
-            std::reverse(indexes, indexes + arrsize);
+            // Only reverse the real portion; NaN at the end stays in place
+            std::reverse(keys, keys + index_last_elem + 1);
+            std::reverse(indexes, indexes + index_last_elem + 1);
         }
     }
 

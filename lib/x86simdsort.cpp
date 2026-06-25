@@ -101,122 +101,172 @@ namespace x86simdsort {
 #ifdef _MSC_VER
 #define DECLARE_INTERNAL_qsort(TYPE) \
     static void CAT(resolve_qsort, TYPE)(void); \
-    static void (*internal_qsort##TYPE)(TYPE *, size_t, bool, bool) = NULL; \
+    static void (*internal_qsort##TYPE)(TYPE *, size_t, bool, bool, bool) \
+            = NULL; \
     template <> \
-    void XSS_EXPORT_SYMBOL qsort( \
-            TYPE *arr, size_t arrsize, bool hasnan, bool descending) \
+    void XSS_EXPORT_SYMBOL qsort(TYPE *arr, \
+                                 size_t arrsize, \
+                                 bool hasnan, \
+                                 bool descending, \
+                                 bool nans_last) \
     { \
         if (internal_qsort##TYPE == NULL) { CAT(resolve_qsort, TYPE)(); } \
-        (*internal_qsort##TYPE)(arr, arrsize, hasnan, descending); \
+        (*internal_qsort##TYPE)( \
+                arr, arrsize, hasnan, descending, nans_last); \
     }
 
 #define DECLARE_INTERNAL_qselect(TYPE) \
     static void CAT(resolve_qselect, TYPE)(void); \
-    static void (*internal_qselect##TYPE)(TYPE *, size_t, size_t, bool, bool) \
+    static void (*internal_qselect##TYPE)( \
+            TYPE *, size_t, size_t, bool, bool, bool) \
             = NULL; \
     template <> \
-    void XSS_EXPORT_SYMBOL qselect( \
-            TYPE *arr, size_t k, size_t arrsize, bool hasnan, bool descending) \
+    void XSS_EXPORT_SYMBOL qselect(TYPE *arr, \
+                                   size_t k, \
+                                   size_t arrsize, \
+                                   bool hasnan, \
+                                   bool descending, \
+                                   bool nans_last) \
     { \
         if (internal_qselect##TYPE == NULL) { CAT(resolve_qselect, TYPE)(); } \
-        (*internal_qselect##TYPE)(arr, k, arrsize, hasnan, descending); \
+        (*internal_qselect##TYPE)( \
+                arr, k, arrsize, hasnan, descending, nans_last); \
     }
 
 #define DECLARE_INTERNAL_partial_qsort(TYPE) \
     static void CAT(resolve_partial_qsort, TYPE)(void); \
     static void (*internal_partial_qsort##TYPE)( \
-            TYPE *, size_t, size_t, bool, bool) \
+            TYPE *, size_t, size_t, bool, bool, bool) \
             = NULL; \
     template <> \
-    void XSS_EXPORT_SYMBOL partial_qsort( \
-            TYPE *arr, size_t k, size_t arrsize, bool hasnan, bool descending) \
+    void XSS_EXPORT_SYMBOL partial_qsort(TYPE *arr, \
+                                         size_t k, \
+                                         size_t arrsize, \
+                                         bool hasnan, \
+                                         bool descending, \
+                                         bool nans_last) \
     { \
         if (internal_partial_qsort##TYPE == NULL) { \
             CAT(resolve_partial_qsort, TYPE)(); \
         } \
-        (*internal_partial_qsort##TYPE)(arr, k, arrsize, hasnan, descending); \
+        (*internal_partial_qsort##TYPE)( \
+                arr, k, arrsize, hasnan, descending, nans_last); \
     }
 
 #define DECLARE_INTERNAL_argsort(TYPE) \
     static void CAT(resolve_argsort, TYPE)(void); \
     static std::vector<size_t> (*internal_argsort##TYPE)( \
-            const TYPE *, size_t, bool, bool) \
+            const TYPE *, size_t, bool, bool, bool) \
             = NULL; \
     template <> \
-    std::vector<size_t> XSS_EXPORT_SYMBOL argsort( \
-            const TYPE *arr, size_t arrsize, bool hasnan, bool descending) \
+    std::vector<size_t> XSS_EXPORT_SYMBOL argsort(const TYPE *arr, \
+                                                  size_t arrsize, \
+                                                  bool hasnan, \
+                                                  bool descending, \
+                                                  bool nans_last) \
     { \
         if (internal_argsort##TYPE == NULL) { CAT(resolve_argsort, TYPE)(); } \
-        return (*internal_argsort##TYPE)(arr, arrsize, hasnan, descending); \
+        return (*internal_argsort##TYPE)( \
+                arr, arrsize, hasnan, descending, nans_last); \
     }
 
 #define DECLARE_INTERNAL_argselect(TYPE) \
     static void CAT(resolve_argselect, TYPE)(void); \
     static std::vector<size_t> (*internal_argselect##TYPE)( \
-            const TYPE *, size_t, size_t, bool) \
+            const TYPE *, size_t, size_t, bool, bool, bool) \
             = NULL; \
     template <> \
-    std::vector<size_t> XSS_EXPORT_SYMBOL argselect( \
-            const TYPE *arr, size_t k, size_t arrsize, bool hasnan) \
+    std::vector<size_t> XSS_EXPORT_SYMBOL argselect(const TYPE *arr, \
+                                                    size_t k, \
+                                                    size_t arrsize, \
+                                                    bool hasnan, \
+                                                    bool descending, \
+                                                    bool nans_last) \
     { \
         if (internal_argselect##TYPE == NULL) { \
             CAT(resolve_argselect, TYPE)(); \
         } \
-        return (*internal_argselect##TYPE)(arr, k, arrsize, hasnan); \
+        return (*internal_argselect##TYPE)( \
+                arr, k, arrsize, hasnan, descending, nans_last); \
     }
 
 #else
 
 #define DECLARE_INTERNAL_qsort(TYPE) \
-    static void (*internal_qsort##TYPE)(TYPE *, size_t, bool, bool) = NULL; \
+    static void (*internal_qsort##TYPE)(TYPE *, size_t, bool, bool, bool) \
+            = NULL; \
     template <> \
-    void XSS_EXPORT_SYMBOL qsort( \
-            TYPE *arr, size_t arrsize, bool hasnan, bool descending) \
+    void XSS_EXPORT_SYMBOL qsort(TYPE *arr, \
+                                 size_t arrsize, \
+                                 bool hasnan, \
+                                 bool descending, \
+                                 bool nans_last) \
     { \
-        (*internal_qsort##TYPE)(arr, arrsize, hasnan, descending); \
+        (*internal_qsort##TYPE)( \
+                arr, arrsize, hasnan, descending, nans_last); \
     }
 
 #define DECLARE_INTERNAL_qselect(TYPE) \
-    static void (*internal_qselect##TYPE)(TYPE *, size_t, size_t, bool, bool) \
+    static void (*internal_qselect##TYPE)( \
+            TYPE *, size_t, size_t, bool, bool, bool) \
             = NULL; \
     template <> \
-    void XSS_EXPORT_SYMBOL qselect( \
-            TYPE *arr, size_t k, size_t arrsize, bool hasnan, bool descending) \
+    void XSS_EXPORT_SYMBOL qselect(TYPE *arr, \
+                                   size_t k, \
+                                   size_t arrsize, \
+                                   bool hasnan, \
+                                   bool descending, \
+                                   bool nans_last) \
     { \
-        (*internal_qselect##TYPE)(arr, k, arrsize, hasnan, descending); \
+        (*internal_qselect##TYPE)( \
+                arr, k, arrsize, hasnan, descending, nans_last); \
     }
 
 #define DECLARE_INTERNAL_partial_qsort(TYPE) \
     static void (*internal_partial_qsort##TYPE)( \
-            TYPE *, size_t, size_t, bool, bool) \
+            TYPE *, size_t, size_t, bool, bool, bool) \
             = NULL; \
     template <> \
-    void XSS_EXPORT_SYMBOL partial_qsort( \
-            TYPE *arr, size_t k, size_t arrsize, bool hasnan, bool descending) \
+    void XSS_EXPORT_SYMBOL partial_qsort(TYPE *arr, \
+                                         size_t k, \
+                                         size_t arrsize, \
+                                         bool hasnan, \
+                                         bool descending, \
+                                         bool nans_last) \
     { \
-        (*internal_partial_qsort##TYPE)(arr, k, arrsize, hasnan, descending); \
+        (*internal_partial_qsort##TYPE)( \
+                arr, k, arrsize, hasnan, descending, nans_last); \
     }
 
 #define DECLARE_INTERNAL_argsort(TYPE) \
     static std::vector<size_t> (*internal_argsort##TYPE)( \
-            const TYPE *, size_t, bool, bool) \
+            const TYPE *, size_t, bool, bool, bool) \
             = NULL; \
     template <> \
-    std::vector<size_t> XSS_EXPORT_SYMBOL argsort( \
-            const TYPE *arr, size_t arrsize, bool hasnan, bool descending) \
+    std::vector<size_t> XSS_EXPORT_SYMBOL argsort(const TYPE *arr, \
+                                                  size_t arrsize, \
+                                                  bool hasnan, \
+                                                  bool descending, \
+                                                  bool nans_last) \
     { \
-        return (*internal_argsort##TYPE)(arr, arrsize, hasnan, descending); \
+        return (*internal_argsort##TYPE)( \
+                arr, arrsize, hasnan, descending, nans_last); \
     }
 
 #define DECLARE_INTERNAL_argselect(TYPE) \
     static std::vector<size_t> (*internal_argselect##TYPE)( \
-            const TYPE *, size_t, size_t, bool) \
+            const TYPE *, size_t, size_t, bool, bool, bool) \
             = NULL; \
     template <> \
-    std::vector<size_t> XSS_EXPORT_SYMBOL argselect( \
-            const TYPE *arr, size_t k, size_t arrsize, bool hasnan) \
+    std::vector<size_t> XSS_EXPORT_SYMBOL argselect(const TYPE *arr, \
+                                                    size_t k, \
+                                                    size_t arrsize, \
+                                                    bool hasnan, \
+                                                    bool descending, \
+                                                    bool nans_last) \
     { \
-        return (*internal_argselect##TYPE)(arr, k, arrsize, hasnan); \
+        return (*internal_argselect##TYPE)( \
+                arr, k, arrsize, hasnan, descending, nans_last); \
     }
 
 #endif // _MSC_VER

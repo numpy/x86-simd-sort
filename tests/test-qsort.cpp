@@ -76,7 +76,7 @@ TYPED_TEST_P(simdsort, test_qsort_descending)
 #ifndef XSS_ASAN_CI_NOCHECK
             std::sort(sortedarr.begin(),
                       sortedarr.end(),
-                      compare<TypeParam, std::greater<TypeParam>>());
+                      compare_nan_end<TypeParam, std::greater<TypeParam>>());
             IS_SORTED(sortedarr, arr, type);
 #endif
             arr.clear();
@@ -119,11 +119,97 @@ TYPED_TEST_P(simdsort, test_argsort_descending)
 #ifndef XSS_ASAN_CI_NOCHECK
             std::sort(sortedarr.begin(),
                       sortedarr.end(),
-                      compare<TypeParam, std::greater<TypeParam>>());
+                      compare_nan_end<TypeParam, std::greater<TypeParam>>());
             IS_ARG_SORTED(sortedarr, arr, arg, type);
 #endif
             arr.clear();
             arg.clear();
+        }
+    }
+}
+
+TYPED_TEST_P(simdsort, test_argsort_nans_last)
+{
+    if constexpr (xss::fp::is_floating_point_v<TypeParam>) {
+        std::vector<std::string> nan_types
+                = {"rand_with_nan", "rand_with_max_and_nan"};
+        for (auto type : nan_types) {
+            for (auto size : this->arrsize_long) {
+                std::vector<TypeParam> base = get_array<TypeParam>(type, size);
+
+                // ascending, NaNs at end
+                {
+                    std::vector<TypeParam> arr = base;
+                    std::vector<TypeParam> sortedarr = base;
+                    auto arg = x86simdsort::argsort(
+                            arr.data(), arr.size(), true, false, true);
+#ifndef XSS_ASAN_CI_NOCHECK
+                    std::sort(
+                            sortedarr.begin(),
+                            sortedarr.end(),
+                            compare_nan_end<TypeParam, std::less<TypeParam>>());
+                    IS_ARG_SORTED(sortedarr, arr, arg, type);
+#endif
+                }
+
+                // descending, NaNs at end
+                {
+                    std::vector<TypeParam> arr = base;
+                    std::vector<TypeParam> sortedarr = base;
+                    auto arg = x86simdsort::argsort(
+                            arr.data(), arr.size(), true, true, true);
+#ifndef XSS_ASAN_CI_NOCHECK
+                    std::sort(sortedarr.begin(),
+                              sortedarr.end(),
+                              compare_nan_end<TypeParam,
+                                              std::greater<TypeParam>>());
+                    IS_ARG_SORTED(sortedarr, arr, arg, type);
+#endif
+                }
+            }
+        }
+    }
+}
+
+TYPED_TEST_P(simdsort, test_argsort_leading_nans)
+{
+    if constexpr (xss::fp::is_floating_point_v<TypeParam>) {
+        std::vector<std::string> nan_types
+                = {"rand_with_nan", "rand_with_max_and_nan"};
+        for (auto type : nan_types) {
+            for (auto size : this->arrsize_long) {
+                std::vector<TypeParam> base = get_array<TypeParam>(type, size);
+
+                // ascending, NaNs at start
+                {
+                    std::vector<TypeParam> arr = base;
+                    std::vector<TypeParam> sortedarr = base;
+                    auto arg = x86simdsort::argsort(
+                            arr.data(), arr.size(), true, false, false);
+#ifndef XSS_ASAN_CI_NOCHECK
+                    std::sort(sortedarr.begin(),
+                              sortedarr.end(),
+                              compare_nan_begin<TypeParam,
+                                                std::less<TypeParam>>());
+                    IS_ARG_SORTED(sortedarr, arr, arg, type);
+#endif
+                }
+
+                // descending, NaNs at start
+                {
+                    std::vector<TypeParam> arr = base;
+                    std::vector<TypeParam> sortedarr = base;
+                    auto arg = x86simdsort::argsort(
+                            arr.data(), arr.size(), true, true, false);
+#ifndef XSS_ASAN_CI_NOCHECK
+                    std::sort(sortedarr.begin(),
+                              sortedarr.end(),
+                              compare_nan_begin<TypeParam,
+                                                std::greater<TypeParam>>());
+                    IS_ARG_SORTED(sortedarr, arr, arg, type);
+#endif
+                }
+            }
         }
     }
 }
@@ -169,10 +255,11 @@ TYPED_TEST_P(simdsort, test_qselect_descending)
 
             x86simdsort::qselect(arr.data(), k, arr.size(), hasnan, true);
 #ifndef XSS_ASAN_CI_NOCHECK
-            std::nth_element(sortedarr.begin(),
-                             sortedarr.begin() + k,
-                             sortedarr.end(),
-                             compare<TypeParam, std::greater<TypeParam>>());
+            std::nth_element(
+                    sortedarr.begin(),
+                    sortedarr.begin() + k,
+                    sortedarr.end(),
+                    compare_nan_end<TypeParam, std::greater<TypeParam>>());
             if (size == 0) continue;
             IS_ARR_PARTITIONED(arr, k, sortedarr[k], type, true);
 #endif
@@ -182,7 +269,105 @@ TYPED_TEST_P(simdsort, test_qselect_descending)
     }
 }
 
-TYPED_TEST_P(simdsort, test_argselect)
+TYPED_TEST_P(simdsort, test_qselect_nans_last)
+{
+    if constexpr (xss::fp::is_floating_point_v<TypeParam>) {
+        std::vector<std::string> nan_types
+                = {"rand_with_nan", "rand_with_max_and_nan"};
+        for (auto type : nan_types) {
+            for (auto size : this->arrsize) {
+                size_t k = size != 0 ? rand() % size : 0;
+                std::vector<TypeParam> base = get_array<TypeParam>(type, size);
+
+                // ascending, NaNs at end
+                {
+                    std::vector<TypeParam> arr = base;
+                    std::vector<TypeParam> sortedarr = base;
+                    x86simdsort::qselect(
+                            arr.data(), k, arr.size(), true, false, true);
+#ifndef XSS_ASAN_CI_NOCHECK
+                    std::nth_element(
+                            sortedarr.begin(),
+                            sortedarr.begin() + k,
+                            sortedarr.end(),
+                            compare_nan_end<TypeParam, std::less<TypeParam>>());
+                    if (size == 0) continue;
+                    IS_ARR_PARTITIONED(arr, k, sortedarr[k], type);
+#endif
+                }
+
+                // descending, NaNs at end
+                {
+                    std::vector<TypeParam> arr = base;
+                    std::vector<TypeParam> sortedarr = base;
+                    x86simdsort::qselect(
+                            arr.data(), k, arr.size(), true, true, true);
+#ifndef XSS_ASAN_CI_NOCHECK
+                    std::nth_element(
+                            sortedarr.begin(),
+                            sortedarr.begin() + k,
+                            sortedarr.end(),
+                            compare_nan_end<TypeParam,
+                                            std::greater<TypeParam>>());
+                    if (size == 0) continue;
+                    IS_ARR_PARTITIONED(arr, k, sortedarr[k], type, true);
+#endif
+                }
+            }
+        }
+    }
+}
+
+TYPED_TEST_P(simdsort, test_qselect_leading_nans)
+{
+    if constexpr (xss::fp::is_floating_point_v<TypeParam>) {
+        std::vector<std::string> nan_types
+                = {"rand_with_nan", "rand_with_max_and_nan"};
+        for (auto type : nan_types) {
+            for (auto size : this->arrsize) {
+                size_t k = size != 0 ? rand() % size : 0;
+                std::vector<TypeParam> base = get_array<TypeParam>(type, size);
+
+                // ascending, NaNs at start
+                {
+                    std::vector<TypeParam> arr = base;
+                    std::vector<TypeParam> sortedarr = base;
+                    x86simdsort::qselect(
+                            arr.data(), k, arr.size(), true, false, false);
+#ifndef XSS_ASAN_CI_NOCHECK
+                    std::nth_element(sortedarr.begin(),
+                                     sortedarr.begin() + k,
+                                     sortedarr.end(),
+                                     compare_nan_begin<TypeParam,
+                                                       std::less<TypeParam>>());
+                    if (size == 0) continue;
+                    IS_ARR_PARTITIONED(arr, k, sortedarr[k], type);
+#endif
+                }
+
+                // descending, NaNs at start
+                {
+                    std::vector<TypeParam> arr = base;
+                    std::vector<TypeParam> sortedarr = base;
+                    x86simdsort::qselect(
+                            arr.data(), k, arr.size(), true, true, false);
+#ifndef XSS_ASAN_CI_NOCHECK
+                    std::nth_element(
+                            sortedarr.begin(),
+                            sortedarr.begin() + k,
+                            sortedarr.end(),
+                            compare_nan_begin<TypeParam,
+                                              std::greater<TypeParam>>());
+                    if (size == 0) continue;
+                    IS_ARR_PARTITIONED(arr, k, sortedarr[k], type, true);
+#endif
+                }
+            }
+        }
+    }
+}
+
+TYPED_TEST_P(simdsort, test_argselect_ascending)
 {
     for (auto type : this->arrtype) {
         bool hasnan = is_nan_test(type);
@@ -202,6 +387,130 @@ TYPED_TEST_P(simdsort, test_argselect)
 #endif
             arr.clear();
             sortedarr.clear();
+        }
+    }
+}
+
+TYPED_TEST_P(simdsort, test_argselect_descending)
+{
+    for (auto type : this->arrtype) {
+        bool hasnan = is_nan_test(type);
+        for (auto size : this->arrsize) {
+            size_t k = size != 0 ? rand() % size : 0;
+            std::vector<TypeParam> arr = get_array<TypeParam>(type, size);
+            std::vector<TypeParam> sortedarr = arr;
+
+            auto arg = x86simdsort::argselect(
+                    arr.data(), k, arr.size(), hasnan, true);
+#ifndef XSS_ASAN_CI_NOCHECK
+            std::nth_element(
+                    sortedarr.begin(),
+                    sortedarr.begin() + k,
+                    sortedarr.end(),
+                    compare_nan_end<TypeParam, std::greater<TypeParam>>());
+            if (size == 0) continue;
+            IS_ARG_PARTITIONED(arr, arg, sortedarr[k], k, type, true);
+#endif
+            arr.clear();
+            sortedarr.clear();
+        }
+    }
+}
+
+TYPED_TEST_P(simdsort, test_argselect_nans_last)
+{
+    if constexpr (xss::fp::is_floating_point_v<TypeParam>) {
+        std::vector<std::string> nan_types
+                = {"rand_with_nan", "rand_with_max_and_nan"};
+        for (auto type : nan_types) {
+            for (auto size : this->arrsize) {
+                size_t k = size != 0 ? rand() % size : 0;
+                std::vector<TypeParam> base = get_array<TypeParam>(type, size);
+
+                // ascending, NaNs at end
+                {
+                    std::vector<TypeParam> arr = base;
+                    std::vector<TypeParam> sortedarr = base;
+                    auto arg = x86simdsort::argselect(
+                            arr.data(), k, arr.size(), true, false, true);
+#ifndef XSS_ASAN_CI_NOCHECK
+                    std::nth_element(
+                            sortedarr.begin(),
+                            sortedarr.begin() + k,
+                            sortedarr.end(),
+                            compare_nan_end<TypeParam, std::less<TypeParam>>());
+                    if (size == 0) continue;
+                    IS_ARG_PARTITIONED(arr, arg, sortedarr[k], k, type);
+#endif
+                }
+
+                // descending, NaNs at end
+                {
+                    std::vector<TypeParam> arr = base;
+                    std::vector<TypeParam> sortedarr = base;
+                    auto arg = x86simdsort::argselect(
+                            arr.data(), k, arr.size(), true, true, true);
+#ifndef XSS_ASAN_CI_NOCHECK
+                    std::nth_element(
+                            sortedarr.begin(),
+                            sortedarr.begin() + k,
+                            sortedarr.end(),
+                            compare_nan_end<TypeParam,
+                                            std::greater<TypeParam>>());
+                    if (size == 0) continue;
+                    IS_ARG_PARTITIONED(arr, arg, sortedarr[k], k, type, true);
+#endif
+                }
+            }
+        }
+    }
+}
+
+TYPED_TEST_P(simdsort, test_argselect_leading_nans)
+{
+    if constexpr (xss::fp::is_floating_point_v<TypeParam>) {
+        std::vector<std::string> nan_types
+                = {"rand_with_nan", "rand_with_max_and_nan"};
+        for (auto type : nan_types) {
+            for (auto size : this->arrsize) {
+                size_t k = size != 0 ? rand() % size : 0;
+                std::vector<TypeParam> base = get_array<TypeParam>(type, size);
+
+                // ascending, NaNs at start
+                {
+                    std::vector<TypeParam> arr = base;
+                    std::vector<TypeParam> sortedarr = base;
+                    auto arg = x86simdsort::argselect(
+                            arr.data(), k, arr.size(), true, false, false);
+#ifndef XSS_ASAN_CI_NOCHECK
+                    std::nth_element(sortedarr.begin(),
+                                     sortedarr.begin() + k,
+                                     sortedarr.end(),
+                                     compare_nan_begin<TypeParam,
+                                                       std::less<TypeParam>>());
+                    if (size == 0) continue;
+                    IS_ARG_PARTITIONED(arr, arg, sortedarr[k], k, type);
+#endif
+                }
+
+                // descending, NaNs at start
+                {
+                    std::vector<TypeParam> arr = base;
+                    std::vector<TypeParam> sortedarr = base;
+                    auto arg = x86simdsort::argselect(
+                            arr.data(), k, arr.size(), true, true, false);
+#ifndef XSS_ASAN_CI_NOCHECK
+                    std::nth_element(
+                            sortedarr.begin(),
+                            sortedarr.begin() + k,
+                            sortedarr.end(),
+                            compare_nan_begin<TypeParam,
+                                              std::greater<TypeParam>>());
+                    if (size == 0) continue;
+                    IS_ARG_PARTITIONED(arr, arg, sortedarr[k], k, type, true);
+#endif
+                }
+            }
         }
     }
 }
@@ -248,7 +557,7 @@ TYPED_TEST_P(simdsort, test_partial_qsort_descending)
 #ifndef XSS_ASAN_CI_NOCHECK
             std::sort(sortedarr.begin(),
                       sortedarr.end(),
-                      compare<TypeParam, std::greater<TypeParam>>());
+                      compare_nan_end<TypeParam, std::greater<TypeParam>>());
             if (size == 0) continue;
             IS_ARR_PARTIALSORTED(arr, k, sortedarr, type);
 #endif
@@ -291,14 +600,109 @@ TYPED_TEST_P(simdsort, test_comparator)
     }
 }
 
+TYPED_TEST_P(simdsort, test_qsort_nans_last)
+{
+    if constexpr (xss::fp::is_floating_point_v<TypeParam>) {
+        std::vector<std::string> nan_types
+                = {"rand_with_nan", "rand_with_max_and_nan"};
+        for (auto type : nan_types) {
+            for (auto size : this->arrsize_long) {
+                std::vector<TypeParam> base = get_array<TypeParam>(type, size);
+
+                // ascending, NaNs at end
+                {
+                    std::vector<TypeParam> arr = base;
+                    std::vector<TypeParam> sortedarr = base;
+                    x86simdsort::qsort(
+                            arr.data(), arr.size(), true, false, true);
+#ifndef XSS_ASAN_CI_NOCHECK
+                    std::sort(
+                            sortedarr.begin(),
+                            sortedarr.end(),
+                            compare_nan_end<TypeParam, std::less<TypeParam>>());
+                    IS_SORTED(sortedarr, arr, type);
+#endif
+                }
+
+                // descending, NaNs at end
+                {
+                    std::vector<TypeParam> arr = base;
+                    std::vector<TypeParam> sortedarr = base;
+                    x86simdsort::qsort(
+                            arr.data(), arr.size(), true, true, true);
+#ifndef XSS_ASAN_CI_NOCHECK
+                    std::sort(sortedarr.begin(),
+                              sortedarr.end(),
+                              compare_nan_end<TypeParam,
+                                              std::greater<TypeParam>>());
+                    IS_SORTED(sortedarr, arr, type);
+#endif
+                }
+            }
+        }
+    }
+}
+
+TYPED_TEST_P(simdsort, test_qsort_leading_nans)
+{
+    if constexpr (xss::fp::is_floating_point_v<TypeParam>) {
+        std::vector<std::string> nan_types
+                = {"rand_with_nan", "rand_with_max_and_nan"};
+        for (auto type : nan_types) {
+            for (auto size : this->arrsize_long) {
+                std::vector<TypeParam> base = get_array<TypeParam>(type, size);
+
+                // ascending, NaNs at start
+                {
+                    std::vector<TypeParam> arr = base;
+                    std::vector<TypeParam> sortedarr = base;
+                    x86simdsort::qsort(
+                            arr.data(), arr.size(), true, false, false);
+#ifndef XSS_ASAN_CI_NOCHECK
+                    std::sort(sortedarr.begin(),
+                              sortedarr.end(),
+                              compare_nan_begin<TypeParam,
+                                                std::less<TypeParam>>());
+                    IS_SORTED(sortedarr, arr, type);
+#endif
+                }
+
+                // descending, NaNs at start
+                {
+                    std::vector<TypeParam> arr = base;
+                    std::vector<TypeParam> sortedarr = base;
+                    x86simdsort::qsort(
+                            arr.data(), arr.size(), true, true, false);
+#ifndef XSS_ASAN_CI_NOCHECK
+                    std::sort(sortedarr.begin(),
+                              sortedarr.end(),
+                              compare_nan_begin<TypeParam,
+                                                std::greater<TypeParam>>());
+                    IS_SORTED(sortedarr, arr, type);
+#endif
+                }
+            }
+        }
+    }
+}
+
 REGISTER_TYPED_TEST_SUITE_P(simdsort,
                             test_qsort_ascending,
                             test_qsort_descending,
+                            test_qsort_nans_last,
+                            test_qsort_leading_nans,
                             test_argsort_ascending,
                             test_argsort_descending,
-                            test_argselect,
+                            test_argsort_nans_last,
+                            test_argsort_leading_nans,
+                            test_argselect_ascending,
+                            test_argselect_descending,
+                            test_argselect_nans_last,
+                            test_argselect_leading_nans,
                             test_qselect_ascending,
                             test_qselect_descending,
+                            test_qselect_nans_last,
+                            test_qselect_leading_nans,
                             test_partial_qsort_ascending,
                             test_partial_qsort_descending,
                             test_comparator);

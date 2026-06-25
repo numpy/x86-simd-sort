@@ -175,26 +175,4 @@ X86_SIMD_SORT_INLINE_ONLY bool is_a_nan<_Float16>(_Float16 elem)
     return elem != elem;
 }
 
-template <>
-X86_SIMD_SORT_INLINE_ONLY void replace_inf_with_nan(_Float16 *arr,
-                                                    arrsize_t size,
-                                                    arrsize_t nan_count,
-                                                    bool descending)
-{
-    Fp16Bits val;
-    val.i_ = 0x7c01;
-
-    if (descending) {
-        for (arrsize_t ii = 0; nan_count > 0; ++ii) {
-            arr[ii] = val.f_;
-            nan_count -= 1;
-        }
-    }
-    else {
-        for (arrsize_t ii = size - 1; nan_count > 0; --ii) {
-            arr[ii] = val.f_;
-            nan_count -= 1;
-        }
-    }
-}
 #endif // AVX512FP16_QSORT_16BIT
