@@ -43,18 +43,17 @@ X86_SIMD_SORT_INLINE void std_argsort_withnan(const T *arr,
                                               bool nans_last = true,
                                               bool descending = false)
 {
-    std::sort(
-            arg + left,
-            arg + right,
-            [arr, nans_last, descending](arrsize_t a, arrsize_t b) -> bool {
-                bool a_nan = std::isnan(arr[a]);
-                bool b_nan = std::isnan(arr[b]);
-                if (!a_nan && !b_nan) {
-                    return descending ? arr[a] > arr[b] : arr[a] < arr[b];
-                }
-                if (a_nan && b_nan) { return false; }
-                return nans_last ? !a_nan : a_nan;
-            });
+    std::sort(arg + left,
+              arg + right,
+              [arr, nans_last, descending](arrsize_t a, arrsize_t b) -> bool {
+                  bool a_nan = std::isnan(arr[a]);
+                  bool b_nan = std::isnan(arr[b]);
+                  if (!a_nan && !b_nan) {
+                      return descending ? arr[a] > arr[b] : arr[a] < arr[b];
+                  }
+                  if (a_nan && b_nan) { return false; }
+                  return nans_last ? !a_nan : a_nan;
+              });
 }
 
 /* argsort using std::sort */

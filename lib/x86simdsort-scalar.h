@@ -56,11 +56,8 @@ namespace utils {
 
 namespace scalar {
     template <typename T>
-    void qsort(T *arr,
-               size_t arrsize,
-               bool hasnan,
-               bool reversed,
-               bool nans_last)
+    void
+    qsort(T *arr, size_t arrsize, bool hasnan, bool reversed, bool nans_last)
     {
         std::sort(arr,
                   arr + arrsize,
