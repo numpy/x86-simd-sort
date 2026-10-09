@@ -519,4 +519,9 @@ void keyvalue_qsort_uint32_uint64(uint32_t *key, uint64_t *val, size_t size)
 {
     x86simdsort::keyvalue_qsort(key, val, size, true);
 }
+XSS_EXPORT_SYMBOL
+void keyvalue_partialsort_float_int32(float *key, int32_t *val, size_t size, size_t k)
+{
+    x86simdsort::keyvalue_partial_sort(key, val, size, k);
+}
 }
