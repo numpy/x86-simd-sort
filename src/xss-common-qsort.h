@@ -720,8 +720,7 @@ X86_SIMD_SORT_INLINE void xss_partial_qsort(T *arr,
                                             bool nans_last = true)
 {
     if (k == 0) return;
-    xss_qselect<vtype, T, descending>(
-            arr, k - 1, arrsize, hasnan, nans_last);
+    xss_qselect<vtype, T, descending>(arr, k - 1, arrsize, hasnan, nans_last);
     xss_qsort<vtype, T, descending>(arr, k - 1, hasnan, nans_last);
 }
 

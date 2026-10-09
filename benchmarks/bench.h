@@ -5,7 +5,7 @@
 #define MY_BENCHMARK_CAPTURE(func, T, test_case_name, ...) \
     BENCHMARK_PRIVATE_DECLARE(func) \
             = (::benchmark::internal::RegisterBenchmarkInternal( \
-                    std::unique_ptr<benchmark::internal::Benchmark>( \
+                    std::unique_ptr<::benchmark::Benchmark>( \
                             new ::benchmark::internal::FunctionBenchmark( \
                                     #func "/" #test_case_name "/" #T, \
                                     [](::benchmark::State &st) { \
