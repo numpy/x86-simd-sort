@@ -99,7 +99,33 @@ get_pivot_smart(type_t *arr, const arrsize_t left, const arrsize_t right)
     constexpr int numVecs = 4;
 
     if (right - left + 1 <= 4 * numVecs * vtype::numlanes) {
-        return pivot_results<type_t>(get_pivot<vtype>(arr, left, right));
+        // Same sample as get_pivot, but a median equal to the smallest sample
+        // must not become the pivot: partitioning on the minimum leaves the
+        // left side empty, so the sort recurses to max_iters and heap sorts.
+        type_t samples[vtype::numlanes];
+        arrsize_t delta = (right - left) / vtype::numlanes;
+        for (int i = 0; i < vtype::numlanes; i++) {
+            samples[i] = arr[left + i * delta];
+        }
+        vtype::storeu(samples, vtype::sort_vec(vtype::loadu(samples)));
+
+        type_t smallest = samples[0];
+        type_t largest = samples[vtype::numlanes - 1];
+        type_t median = samples[vtype::numlanes / 2];
+
+        if (smallest == largest) {
+            return get_pivot_near_constant<vtype, comparator, type_t>(
+                    arr, median, left, right);
+        }
+        else if (median == smallest) {
+            return pivot_results<type_t>(
+                    comparator::choosePivotMedianIsSmallest(median));
+        }
+        else if (median == largest) {
+            return pivot_results<type_t>(
+                    comparator::choosePivotMedianIsLargest(median));
+        }
+        return pivot_results<type_t>(median);
     }
 
     constexpr int N = numVecs * vtype::numlanes;
