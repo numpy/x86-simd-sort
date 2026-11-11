@@ -75,7 +75,7 @@ X86_SIMD_SORT_FINLINE void internal_merge_n_vec(typename vtype::reg_t *reg)
             for (int i = 0; i < numVecs; i++) {
                 reg_t &v = reg[i];
                 reg_t rev = swizzle::template reverse_n<vtype, scale>(v);
-                comparator::COEX(rev, v);
+                comparator::template COEX<true>(rev, v);
                 v = swizzle::template merge_n<vtype, scale>(v, rev);
             }
         }
@@ -85,7 +85,7 @@ X86_SIMD_SORT_FINLINE void internal_merge_n_vec(typename vtype::reg_t *reg)
             for (int i = 0; i < numVecs; i++) {
                 reg_t &v = reg[i];
                 reg_t swap = swizzle::template swap_n<vtype, scale>(v);
-                comparator::COEX(swap, v);
+                comparator::template COEX<true>(swap, v);
                 v = swizzle::template merge_n<vtype, scale>(v, swap);
             }
         }

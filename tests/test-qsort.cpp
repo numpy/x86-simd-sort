@@ -5,6 +5,26 @@
 
 #include "test-qsort-common.h"
 
+#include <cmath>
+
+TEST(qsort, preserves_signed_zeros)
+{
+    for (size_t size : {5, 17}) {
+        for (bool descending : {false, true}) {
+            std::vector<double> values(size, 0.0);
+            values.back() = -0.0;
+            x86simdsort::qsort(values.data(), size, false, descending);
+
+            // Equal zeros may move, but each sign must keep its multiplicity.
+            const auto negative_zeros = std::count_if(
+                    values.begin(), values.end(),
+                    [](double x) { return x == 0.0 && std::signbit(x); });
+            EXPECT_EQ(negative_zeros, 1)
+                    << "size=" << size << ", descending=" << descending;
+        }
+    }
+}
+
 template <typename T>
 class simdsort : public ::testing::Test {
 public:

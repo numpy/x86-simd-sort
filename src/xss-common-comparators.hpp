@@ -57,9 +57,19 @@ struct Comparator {
         }
     }
 
+    template <bool mirrored = false>
     X86_SIMD_SORT_FINLINE void COEX(reg_t &a, reg_t &b)
     {
-        if constexpr (descend) { ::COEX<vtype, reg_t>(b, a); }
+        if constexpr (!mirrored && xss::fp::is_floating_point_v<type_t>) {
+            // Floating-point min and max both select the second input on ties.
+            // Keep both signs of zero when exchanging independent registers.
+            // Mirrored merges already compare each pair in both lane orders.
+            const reg_t lo = vtype::min(a, b);
+            const reg_t hi = vtype::max(b, a);
+            a = descend ? hi : lo;
+            b = descend ? lo : hi;
+        }
+        else if constexpr (descend) { ::COEX<vtype, reg_t>(b, a); }
         else {
             ::COEX<vtype, reg_t>(a, b);
         }
