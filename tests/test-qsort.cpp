@@ -7,19 +7,31 @@
 
 #include <cmath>
 
-TEST(qsort, preserves_signed_zeros)
+template <typename T>
+class FloatingPointQSort : public ::testing::Test {};
+
+using FloatingPointTypes = testing::Types<
+#if __GNUC__ >= 13 || __clang_major__ >= 6
+        _Float16,
+#endif
+        float,
+        double>;
+TYPED_TEST_SUITE(FloatingPointQSort, FloatingPointTypes);
+
+TYPED_TEST(FloatingPointQSort, preserves_signed_zeros)
 {
-    for (size_t size : {5, 17}) {
+    // 33 half-precision values span two AVX-512 registers.
+    for (size_t size : {5, 17, 33}) {
         for (bool descending : {false, true}) {
-            std::vector<double> values(size, 0.0);
-            values.back() = -0.0;
+            std::vector<TypeParam> values(size);
+            values.back() = static_cast<TypeParam>(-0.0);
             x86simdsort::qsort(values.data(), size, false, descending);
 
             // Equal zeros may move, but each sign must keep its multiplicity.
-            const auto negative_zeros
-                    = std::count_if(values.begin(), values.end(), [](double x) {
-                          return x == 0.0 && std::signbit(x);
-                      });
+            const auto negative_zeros = std::count_if(
+                    values.begin(), values.end(), [](TypeParam x) {
+                        return x == 0 && std::signbit(static_cast<double>(x));
+                    });
             EXPECT_EQ(negative_zeros, 1)
                     << "size=" << size << ", descending=" << descending;
         }
