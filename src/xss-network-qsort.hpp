@@ -3,9 +3,6 @@
 
 #include "xss-optimal-networks.hpp"
 
-template <typename vtype, typename mm_t>
-X86_SIMD_SORT_INLINE void COEX(mm_t &a, mm_t &b);
-
 template <typename vtype,
           typename comparator,
           int numVecs,
@@ -75,7 +72,8 @@ X86_SIMD_SORT_FINLINE void internal_merge_n_vec(typename vtype::reg_t *reg)
             for (int i = 0; i < numVecs; i++) {
                 reg_t &v = reg[i];
                 reg_t rev = swizzle::template reverse_n<vtype, scale>(v);
-                comparator::template COEX<true>(rev, v);
+                // Mirrored pairs are compared in both lane orders before merging.
+                comparator::template COEX<false>(rev, v);
                 v = swizzle::template merge_n<vtype, scale>(v, rev);
             }
         }
@@ -85,7 +83,7 @@ X86_SIMD_SORT_FINLINE void internal_merge_n_vec(typename vtype::reg_t *reg)
             for (int i = 0; i < numVecs; i++) {
                 reg_t &v = reg[i];
                 reg_t swap = swizzle::template swap_n<vtype, scale>(v);
-                comparator::template COEX<true>(swap, v);
+                comparator::template COEX<false>(swap, v);
                 v = swizzle::template merge_n<vtype, scale>(v, swap);
             }
         }

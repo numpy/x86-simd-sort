@@ -131,11 +131,18 @@ X86_SIMD_SORT_INLINE bool comparison_func(const T &a, const T &b)
 /*
  * COEX == Compare and Exchange two registers by swapping min and max values
  */
-template <typename vtype, typename mm_t>
+template <typename vtype, bool keep_lane_on_tie, typename mm_t>
 X86_SIMD_SORT_INLINE void COEX(mm_t &a, mm_t &b)
 {
     mm_t temp = a;
-    a = vtype::min(a, b);
+    // Floating-point min and max select their second operand on a tie.
+    if constexpr (keep_lane_on_tie
+                  && xss::fp::is_floating_point_v<typename vtype::type_t>) {
+        a = vtype::min(b, a);
+    }
+    else {
+        a = vtype::min(a, b);
+    }
     b = vtype::max(temp, b);
 }
 
