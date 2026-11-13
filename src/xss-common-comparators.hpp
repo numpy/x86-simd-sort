@@ -69,7 +69,9 @@ struct Comparator {
             a = descend ? hi : lo;
             b = descend ? lo : hi;
         }
-        else if constexpr (descend) { ::COEX<vtype, reg_t>(b, a); }
+        else if constexpr (descend) {
+            ::COEX<vtype, reg_t>(b, a);
+        }
         else {
             ::COEX<vtype, reg_t>(a, b);
         }
