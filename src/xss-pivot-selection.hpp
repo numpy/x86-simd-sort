@@ -20,9 +20,6 @@ struct pivot_results {
     }
 };
 
-template <typename vtype, typename mm_t>
-X86_SIMD_SORT_INLINE void COEX(mm_t &a, mm_t &b);
-
 template <typename vtype, typename type_t>
 X86_SIMD_SORT_INLINE type_t get_pivot(type_t *arr,
                                       const arrsize_t left,

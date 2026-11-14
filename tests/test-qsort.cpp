@@ -5,6 +5,8 @@
 
 #include "test-qsort-common.h"
 
+#include <cmath>
+
 template <typename T>
 class simdsort : public ::testing::Test {
 public:
@@ -36,6 +38,29 @@ public:
 };
 
 TYPED_TEST_SUITE_P(simdsort);
+
+TYPED_TEST_P(simdsort, preserves_signed_zeros)
+{
+    if constexpr (xss::fp::is_floating_point_v<TypeParam>) {
+        // 33 half-precision values span two AVX-512 registers.
+        for (size_t size : {5, 17, 33}) {
+            for (bool descending : {false, true}) {
+                std::vector<TypeParam> values(size);
+                values.back() = static_cast<TypeParam>(-0.0);
+                x86simdsort::qsort(values.data(), size, false, descending);
+
+                // Equal zeros may move, but each sign must keep its multiplicity.
+                const auto negative_zeros = std::count_if(
+                        values.begin(), values.end(), [](TypeParam x) {
+                            return x == 0
+                                    && std::signbit(static_cast<double>(x));
+                        });
+                EXPECT_EQ(negative_zeros, 1)
+                        << "size=" << size << ", descending=" << descending;
+            }
+        }
+    }
+}
 
 TYPED_TEST_P(simdsort, test_qsort_ascending)
 {
@@ -687,6 +712,7 @@ TYPED_TEST_P(simdsort, test_qsort_leading_nans)
 }
 
 REGISTER_TYPED_TEST_SUITE_P(simdsort,
+                            preserves_signed_zeros,
                             test_qsort_ascending,
                             test_qsort_descending,
                             test_qsort_nans_last,
