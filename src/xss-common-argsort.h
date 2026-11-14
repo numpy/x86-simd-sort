@@ -627,9 +627,15 @@ X86_SIMD_SORT_INLINE void xss_argsort(const T *arr,
         UNUSED(nans_last);
 
         /* early exit for already sorted arrays: float/double with nan never reach here*/
-        auto comp = descending ? Comparator<vectype, true>::STDSortComparator
-                               : Comparator<vectype, false>::STDSortComparator;
-        if (std::is_sorted(arr, arr + arrsize, comp)) { return; }
+        // Pick the scan first so its comparator stays known at compile time.
+        bool already_sorted = descending
+                ? std::is_sorted(arr, arr + arrsize, [](const T &a, const T &b) {
+                      return Comparator<vectype, true>::STDSortComparator(a, b);
+                  })
+                : std::is_sorted(arr, arr + arrsize, [](const T &a, const T &b) {
+                      return Comparator<vectype, false>::STDSortComparator(a, b);
+                  });
+        if (already_sorted) { return; }
 
 #ifdef XSS_COMPILE_OPENMP
 
