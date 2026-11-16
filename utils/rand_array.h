@@ -103,6 +103,19 @@ static std::vector<T> get_array(std::string arrtype,
         }
         std::shuffle(arr.begin(), arr.end(), std::default_random_engine(42));
     }
+    else if (arrtype == "mostly_min") {
+        // 75% of the elements equal the minimum, so it is the median of most
+        // pivot samples: a partitioning pivot must not be that minimum
+        size_t temp = std::max((size_t)1, (size_t)(0.25 * arrsize));
+        std::vector<T> temparr = get_uniform_rand_array<T>(temp, max, min);
+        for (size_t ii = 0; ii < arrsize; ++ii) {
+            if (ii < temp) { arr.push_back(temparr[ii]); }
+            else {
+                arr.push_back(min);
+            }
+        }
+        std::shuffle(arr.begin(), arr.end(), std::default_random_engine(42));
+    }
     else if (arrtype == "max_at_the_end") {
         arr = get_uniform_rand_array<T>(arrsize, max, min);
         if (xss::fp::is_floating_point_v<T>) {

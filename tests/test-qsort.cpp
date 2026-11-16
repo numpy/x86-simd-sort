@@ -26,6 +26,7 @@ public:
                    "smallrange",
                    "max_at_the_end",
                    "random_5d",
+                   "mostly_min",
                    "rand_max",
                    "rand_with_nan",
                    "rand_with_max_and_nan"};
