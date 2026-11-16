@@ -43,7 +43,7 @@ X86_SIMD_SORT_INLINE void std_argsort_withnan(const T *arr,
                                               bool nans_last = true,
                                               bool descending = false)
 {
-    std::sort(
+    XSS_STD_SORT(
             arg + left,
             arg + right,
             [arr, nans_last, descending](arrsize_t a, arrsize_t b) -> bool {
@@ -62,12 +62,12 @@ template <typename T>
 X86_SIMD_SORT_INLINE void
 std_argsort(const T *arr, arrsize_t *arg, arrsize_t left, arrsize_t right)
 {
-    std::sort(arg + left,
-              arg + right,
-              [arr](arrsize_t left, arrsize_t right) -> bool {
-                  // sort indices according to corresponding array element
-                  return arr[left] < arr[right];
-              });
+    XSS_STD_SORT(arg + left,
+                 arg + right,
+                 [arr](arrsize_t left, arrsize_t right) -> bool {
+                     // sort indices according to corresponding array element
+                     return arr[left] < arr[right];
+                 });
 }
 
 /*
