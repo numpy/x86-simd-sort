@@ -487,7 +487,15 @@ static void qsort_(type_t *arr,
      * Resort to std::sort if quicksort isnt making any progress
      */
     if (max_iters <= 0) {
-        std::sort(arr + left, arr + right + 1, comparator::STDSortComparator);
+        // A lambda rather than a function pointer: its type is local to this
+        // function, so the std::sort instantiation is too, and builds of this
+        // header for different ISAs do not share (and the linker does not
+        // merge) one copy of the std::sort internals.
+        XSS_STD_SORT(arr + left,
+                     arr + right + 1,
+                     [](const type_t &a, const type_t &b) {
+                         return comparator::STDSortComparator(a, b);
+                     });
         return;
     }
     /*
@@ -565,7 +573,12 @@ X86_SIMD_SORT_INLINE void qselect_(type_t *arr,
      * Resort to std::sort if quicksort isnt making any progress
      */
     if (max_iters <= 0) {
-        std::sort(arr + left, arr + right + 1, comparator::STDSortComparator);
+        // A lambda rather than a function pointer: see qsort_.
+        XSS_STD_SORT(arr + left,
+                     arr + right + 1,
+                     [](const type_t &a, const type_t &b) {
+                         return comparator::STDSortComparator(a, b);
+                     });
         return;
     }
     /*
