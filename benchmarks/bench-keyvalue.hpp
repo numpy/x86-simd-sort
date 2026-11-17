@@ -40,9 +40,25 @@ static void simdkvsort(benchmark::State &state, Args &&...args)
     }
 }
 
+// 75% of the keys equal the minimum: 129-256 keys took the small-array pivot,
+// which could pick the minimum and stall the sort
+#define BENCH_KVSORT_MOSTLY_MIN(func, type) \
+    MY_BENCHMARK_CAPTURE( \
+            func, type, mostly_min_128, 128, std::string("mostly_min")); \
+    MY_BENCHMARK_CAPTURE( \
+            func, type, mostly_min_200, 200, std::string("mostly_min")); \
+    MY_BENCHMARK_CAPTURE( \
+            func, type, mostly_min_256, 256, std::string("mostly_min")); \
+    MY_BENCHMARK_CAPTURE( \
+            func, type, mostly_min_300, 300, std::string("mostly_min")); \
+    MY_BENCHMARK_CAPTURE( \
+            func, type, mostly_min_512, 512, std::string("mostly_min"));
+
 #define BENCH_BOTH_KVSORT(type) \
     BENCH_SORT(simdkvsort, type) \
-    BENCH_SORT(scalarkvsort, type)
+    BENCH_SORT(scalarkvsort, type) \
+    BENCH_KVSORT_MOSTLY_MIN(simdkvsort, type) \
+    BENCH_KVSORT_MOSTLY_MIN(scalarkvsort, type)
 
 BENCH_BOTH_KVSORT(uint64_t)
 BENCH_BOTH_KVSORT(int64_t)
