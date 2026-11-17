@@ -11,8 +11,7 @@
                bool descending, \
                bool nans_last) \
     { \
-        x86simdsortStatic::qsort( \
-                arr, arrsize, hasnan, descending, nans_last); \
+        x86simdsortStatic::qsort(arr, arrsize, hasnan, descending, nans_last); \
     } \
     template <> \
     void qselect(type *arr, \

@@ -37,6 +37,16 @@
 #define PRAGMA(x) _Pragma(#x)
 #define UNUSED(x) (void)(x)
 
+/*
+ * Scalar sort for the fallbacks (quicksort not making progress, argsort with
+ * NaNs). Defaults to std::sort. A project can define it, before including
+ * these headers, to its own sort taking (first, last, comp) like std::sort,
+ * e.g. one templated on the ISA it builds these headers for.
+ */
+#ifndef XSS_STD_SORT
+#define XSS_STD_SORT std::sort
+#endif
+
 /* Compiler specific macros specific */
 #ifdef _MSC_VER
 #define X86_SIMD_SORT_INLINE_ONLY inline

@@ -90,11 +90,8 @@ X86_SIMD_SORT_FINLINE void keyvalue_partial_sort(T1 *key,
 
 #define XSS_METHODS(ISA) \
     template <typename T> \
-    X86_SIMD_SORT_FINLINE void x86simdsortStatic::qsort(T *arr, \
-                                                        size_t size, \
-                                                        bool hasnan, \
-                                                        bool descending, \
-                                                        bool nans_last) \
+    X86_SIMD_SORT_FINLINE void x86simdsortStatic::qsort( \
+            T *arr, size_t size, bool hasnan, bool descending, bool nans_last) \
     { \
         ISA##_qsort(arr, size, hasnan, descending, nans_last); \
     } \
@@ -144,14 +141,13 @@ X86_SIMD_SORT_FINLINE void keyvalue_partial_sort(T1 *key,
         return indices; \
     } \
     template <typename T> \
-    X86_SIMD_SORT_FINLINE void x86simdsortStatic::argselect( \
-            const T *arr, \
-            size_t *arg, \
-            size_t k, \
-            size_t size, \
-            bool hasnan, \
-            bool descending, \
-            bool nans_last) \
+    X86_SIMD_SORT_FINLINE void x86simdsortStatic::argselect(const T *arr, \
+                                                            size_t *arg, \
+                                                            size_t k, \
+                                                            size_t size, \
+                                                            bool hasnan, \
+                                                            bool descending, \
+                                                            bool nans_last) \
     { \
         ISA##_argselect(arr, arg, k, size, hasnan, descending, nans_last); \
     } \
@@ -166,13 +162,8 @@ X86_SIMD_SORT_FINLINE void keyvalue_partial_sort(T1 *key,
     { \
         std::vector<size_t> indices(size); \
         std::iota(indices.begin(), indices.end(), 0); \
-        x86simdsortStatic::argselect(arr, \
-                                     indices.data(), \
-                                     k, \
-                                     size, \
-                                     hasnan, \
-                                     descending, \
-                                     nans_last); \
+        x86simdsortStatic::argselect( \
+                arr, indices.data(), k, size, hasnan, descending, nans_last); \
         return indices; \
     } \
     template <typename T1, typename T2> \
