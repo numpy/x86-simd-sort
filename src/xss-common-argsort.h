@@ -43,17 +43,18 @@ X86_SIMD_SORT_INLINE void std_argsort_withnan(const T *arr,
                                               bool nans_last = true,
                                               bool descending = false)
 {
-    std::sort(arg + left,
-              arg + right,
-              [arr, nans_last, descending](arrsize_t a, arrsize_t b) -> bool {
-                  bool a_nan = std::isnan(arr[a]);
-                  bool b_nan = std::isnan(arr[b]);
-                  if (!a_nan && !b_nan) {
-                      return descending ? arr[a] > arr[b] : arr[a] < arr[b];
-                  }
-                  if (a_nan && b_nan) { return false; }
-                  return nans_last ? !a_nan : a_nan;
-              });
+    XSS_STD_SORT(
+            arg + left,
+            arg + right,
+            [arr, nans_last, descending](arrsize_t a, arrsize_t b) -> bool {
+                bool a_nan = std::isnan(arr[a]);
+                bool b_nan = std::isnan(arr[b]);
+                if (!a_nan && !b_nan) {
+                    return descending ? arr[a] > arr[b] : arr[a] < arr[b];
+                }
+                if (a_nan && b_nan) { return false; }
+                return nans_last ? !a_nan : a_nan;
+            });
 }
 
 /* argsort using std::sort */
@@ -61,12 +62,12 @@ template <typename T>
 X86_SIMD_SORT_INLINE void
 std_argsort(const T *arr, arrsize_t *arg, arrsize_t left, arrsize_t right)
 {
-    std::sort(arg + left,
-              arg + right,
-              [arr](arrsize_t left, arrsize_t right) -> bool {
-                  // sort indices according to corresponding array element
-                  return arr[left] < arr[right];
-              });
+    XSS_STD_SORT(arg + left,
+                 arg + right,
+                 [arr](arrsize_t left, arrsize_t right) -> bool {
+                     // sort indices according to corresponding array element
+                     return arr[left] < arr[right];
+                 });
 }
 
 /*
@@ -626,9 +627,15 @@ X86_SIMD_SORT_INLINE void xss_argsort(const T *arr,
         UNUSED(nans_last);
 
         /* early exit for already sorted arrays: float/double with nan never reach here*/
-        auto comp = descending ? Comparator<vectype, true>::STDSortComparator
-                               : Comparator<vectype, false>::STDSortComparator;
-        if (std::is_sorted(arr, arr + arrsize, comp)) { return; }
+        // Pick the scan first so its comparator stays known at compile time.
+        bool already_sorted = descending
+                ? std::is_sorted(arr, arr + arrsize, [](const T &a, const T &b) {
+                      return Comparator<vectype, true>::STDSortComparator(a, b);
+                  })
+                : std::is_sorted(arr, arr + arrsize, [](const T &a, const T &b) {
+                      return Comparator<vectype, false>::STDSortComparator(a, b);
+                  });
+        if (already_sorted) { return; }
 
 #ifdef XSS_COMPILE_OPENMP
 

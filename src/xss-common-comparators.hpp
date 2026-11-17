@@ -31,7 +31,7 @@ type_t next_value(type_t value)
     }
 }
 
-template <typename vtype, typename mm_t>
+template <typename vtype, bool keep_lane_on_tie = true, typename mm_t>
 X86_SIMD_SORT_INLINE void COEX(mm_t &a, mm_t &b);
 
 template <typename vtype, bool descend>
@@ -57,11 +57,12 @@ struct Comparator {
         }
     }
 
+    template <bool keep_lane_on_tie = true>
     X86_SIMD_SORT_FINLINE void COEX(reg_t &a, reg_t &b)
     {
-        if constexpr (descend) { ::COEX<vtype, reg_t>(b, a); }
+        if constexpr (descend) { ::COEX<vtype, keep_lane_on_tie>(b, a); }
         else {
-            ::COEX<vtype, reg_t>(a, b);
+            ::COEX<vtype, keep_lane_on_tie>(a, b);
         }
     }
 
