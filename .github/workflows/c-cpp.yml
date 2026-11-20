@@ -49,7 +49,7 @@ jobs:
 
       # Configure and build with Meson (MSVC will be used automatically)
       - name: Configure (Meson)
-        run: meson setup -Dbuild_tests=true --warnlevel 2 --buildtype release builddir --backend=ninja
+        run: meson setup -Dbuild_tests=true --warnlevel 2 --werror --buildtype release builddir --backend=ninja
 
       - name: Build (Ninja)
         run: ninja -C builddir
