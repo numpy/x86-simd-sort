@@ -76,9 +76,9 @@
 #define UNLIKELY(x) (x)
 #endif
 
-#if defined(__INTEL_COMPILER) and !defined(__SANITIZE_ADDRESS__)
+#if defined(__INTEL_COMPILER) && !defined(__SANITIZE_ADDRESS__)
 #define X86_SIMD_SORT_UNROLL_LOOP(num) PRAGMA(unroll(num))
-#elif __GNUC__ >= 8 and !defined(__SANITIZE_ADDRESS__)
+#elif defined(__GNUC__) && __GNUC__ >= 8 && !defined(__SANITIZE_ADDRESS__)
 #define X86_SIMD_SORT_UNROLL_LOOP(num) PRAGMA(GCC unroll num)
 #else
 #define X86_SIMD_SORT_UNROLL_LOOP(num)
