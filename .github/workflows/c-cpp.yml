@@ -47,25 +47,20 @@ jobs:
           .\vcpkg\bootstrap-vcpkg.bat
           .\vcpkg\vcpkg install gtest:x64-windows pkgconf:x64-windows
 
-      # Configure and build with Meson (MSVC will be used automatically)
+      # Configure and build with Meson (MSVC will be used automatically).
+      # cpp_std=vc++17 on purpose: the project default c++17 makes meson add
+      # /permissive-, under which MSVC accepts code its default mode rejects
+      # (e.g. "and" instead of "&&" in #if). vc++17 is /std:c++17 without
+      # /permissive-, i.e. MSVC as downstream users invoke it. Strict
+      # conformance is already enforced by the gcc/clang/icpx jobs.
       - name: Configure (Meson)
-        run: meson setup -Dbuild_tests=true --warnlevel 2 --werror --buildtype release builddir --backend=ninja
+        run: meson setup -Dbuild_tests=true -Dcpp_std=vc++17 --warnlevel 2 --werror --buildtype release builddir --backend=ninja
 
       - name: Build (Ninja)
         run: ninja -C builddir
       
       - name: Run tests 
         run: meson test -C builddir --test-args "\-\-gtest_filter=*qsort*" -v 
-
-      # Second build in MSVC default (permissive) mode. With cpp_std=c++17 meson
-      # passes /permissive-, and in that mode MSVC accepts code its default mode
-      # rejects (e.g. "and" instead of "&&" in #if). Most downstream users build
-      # the headers without /permissive-, so this build must stay green.
-      - name: Configure permissive-mode MSVC build (Meson)
-        run: meson setup -Dbuild_tests=true -Dcpp_std=vc++17 --warnlevel 2 --werror --buildtype release builddir-permissive --backend=ninja
-
-      - name: Build permissive-mode MSVC build (Ninja)
-        run: ninja -C builddir-permissive
         
   SKL-gcc9:
 
