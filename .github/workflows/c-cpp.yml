@@ -56,6 +56,16 @@ jobs:
       
       - name: Run tests 
         run: meson test -C builddir --test-args "\-\-gtest_filter=*qsort*" -v 
+
+      # Second build in MSVC default (permissive) mode. With cpp_std=c++17 meson
+      # passes /permissive-, and in that mode MSVC accepts code its default mode
+      # rejects (e.g. "and" instead of "&&" in #if). Most downstream users build
+      # the headers without /permissive-, so this build must stay green.
+      - name: Configure permissive-mode MSVC build (Meson)
+        run: meson setup -Dbuild_tests=true -Dcpp_std=vc++17 --warnlevel 2 --werror --buildtype release builddir-permissive --backend=ninja
+
+      - name: Build permissive-mode MSVC build (Ninja)
+        run: ninja -C builddir-permissive
         
   SKL-gcc9:
 
@@ -128,11 +138,14 @@ jobs:
       with:
         compiler: g++-13
 
+    # -fno-operator-names makes gcc treat "and"/"or"/"not" as identifiers like
+    # MSVC does without /permissive-, catching them before the Windows CI does
     - name: Build
       uses: ./.github/actions/meson-build
       with:
         compiler: g++-13
         build-examples: 'true'
+        cxxflags: '-fno-operator-names'
 
     - name: Run test suite on SPR
       run: sde -spr -- ./builddir/testexe --gtest_filter="*simdsort*"

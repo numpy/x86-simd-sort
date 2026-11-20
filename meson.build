@@ -11,6 +11,11 @@ bench = include_directories('benchmarks')
 utils = include_directories('utils')
 tests = include_directories('tests')
 
+# Note on MSVC: cpp_std=c++17 makes meson pass /permissive- (strict conformance).
+# The headers must also build in MSVC default mode, which downstream users
+# generally use; the Windows CI therefore builds a second time with
+# cpp_std=vc++17 (no /permissive-). Keep the headers free of constructs that
+# only /permissive- accepts, e.g. "and" instead of "&&" in #if.
 # check if compiler supports -march=haswell, -march=skylake-avx512 and -march=icelake-client and error out if not
 if cpp.get_id() != 'msvc'
   if not cpp.has_argument('-march=haswell') or not cpp.has_argument('-march=skylake-avx512') or not cpp.has_argument('-march=icelake-client')
