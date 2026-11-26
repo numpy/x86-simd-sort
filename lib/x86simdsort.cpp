@@ -8,12 +8,27 @@
 #include "x86simdsort-scalar.h"
 #include "x86simdsortcpuid.h"
 #include <algorithm>
+#include <cstdlib>
 #include <iostream>
 #include <string>
 
+// true if the environment variable is set, whatever its value
+static bool env_var_is_set(const char *name)
+{
+#ifdef _MSC_VER
+    // the MSVC CRT flags getenv as unsafe (C4996); with a null buffer getenv_s
+    // only reports the size the value would need, 0 if the variable is unset
+    size_t len = 0;
+    getenv_s(&len, nullptr, 0, name);
+    return len != 0;
+#else
+    return std::getenv(name) != nullptr;
+#endif
+}
+
 static int check_cpu_feature_support(std::string_view cpufeature)
 {
-    const char *disable_avx512 = std::getenv("XSS_DISABLE_AVX512");
+    const bool disable_avx512 = env_var_is_set("XSS_DISABLE_AVX512");
 
     if ((cpufeature == "avx512_spr") && (!disable_avx512))
 #if defined(__FLT16_MAX__) && !defined(__INTEL_LLVM_COMPILER) \

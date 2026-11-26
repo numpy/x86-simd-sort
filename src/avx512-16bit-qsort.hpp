@@ -49,8 +49,11 @@ struct zmm_vector<float16> {
 
     static opmask_t ge(reg_t x, reg_t y)
     {
-        reg_t sign_x = _mm512_and_si512(x, _mm512_set1_epi16(0x8000));
-        reg_t sign_y = _mm512_and_si512(y, _mm512_set1_epi16(0x8000));
+        // 0x8000 spelled as int16 min: 0x8000 does not fit in the short
+        // argument of _mm512_set1_epi16 (MSVC C4309)
+        reg_t sign_bit = _mm512_set1_epi16(X86_SIMD_SORT_MIN_INT16);
+        reg_t sign_x = _mm512_and_si512(x, sign_bit);
+        reg_t sign_y = _mm512_and_si512(y, sign_bit);
         reg_t exp_x = _mm512_and_si512(x, _mm512_set1_epi16(0x7c00));
         reg_t exp_y = _mm512_and_si512(y, _mm512_set1_epi16(0x7c00));
         reg_t mant_x = _mm512_and_si512(x, _mm512_set1_epi16(0x3ff));
@@ -60,9 +63,7 @@ struct zmm_vector<float16> {
                 sign_x, sign_y, _MM_CMPINT_LT); // only greater than
         __mmask32 sign_eq = _mm512_cmpeq_epu16_mask(sign_x, sign_y);
         __mmask32 neg = _mm512_mask_cmpeq_epu16_mask(
-                sign_eq,
-                sign_x,
-                _mm512_set1_epi16(0x8000)); // both numbers are -ve
+                sign_eq, sign_x, sign_bit); // both numbers are -ve
 
         // compare exponents only if signs are equal:
         mask_ge = mask_ge
@@ -136,7 +137,8 @@ struct zmm_vector<float16> {
     static type_t float_to_uint16(float val)
     {
         __m128 xmm = _mm_load_ss(&val);
-        __m128i xmm2 = _mm_cvtps_ph(xmm, _MM_FROUND_NO_EXC);
+        // imm8 must be 0-7 (MSVC C4556); only the rounding mode bits are used
+        __m128i xmm2 = _mm_cvtps_ph(xmm, _MM_FROUND_TO_NEAREST_INT);
         return _mm_extract_epi16(xmm2, 0);
     }
     static type_t reducemax(reg_t v)

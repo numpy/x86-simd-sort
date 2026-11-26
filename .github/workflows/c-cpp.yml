@@ -47,9 +47,14 @@ jobs:
           .\vcpkg\bootstrap-vcpkg.bat
           .\vcpkg\vcpkg install gtest:x64-windows pkgconf:x64-windows
 
-      # Configure and build with Meson (MSVC will be used automatically)
+      # Configure and build with Meson (MSVC will be used automatically).
+      # cpp_std=vc++17 on purpose: the project default c++17 makes meson add
+      # /permissive-, under which MSVC accepts code its default mode rejects
+      # (e.g. "and" instead of "&&" in #if). vc++17 is /std:c++17 without
+      # /permissive-, i.e. MSVC as downstream users invoke it. Strict
+      # conformance is already enforced by the gcc/clang/icpx jobs.
       - name: Configure (Meson)
-        run: meson setup -Dbuild_tests=true --warnlevel 2 --buildtype release builddir --backend=ninja
+        run: meson setup -Dbuild_tests=true -Dcpp_std=vc++17 --warnlevel 2 --werror --buildtype release builddir --backend=ninja
 
       - name: Build (Ninja)
         run: ninja -C builddir
@@ -128,11 +133,14 @@ jobs:
       with:
         compiler: g++-13
 
+    # -fno-operator-names makes gcc treat "and"/"or"/"not" as identifiers like
+    # MSVC does without /permissive-, catching them before the Windows CI does
     - name: Build
       uses: ./.github/actions/meson-build
       with:
         compiler: g++-13
         build-examples: 'true'
+        cxxflags: '-fno-operator-names'
 
     - name: Run test suite on SPR
       run: sde -spr -- ./builddir/testexe --gtest_filter="*simdsort*"

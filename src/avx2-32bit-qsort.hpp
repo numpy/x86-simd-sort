@@ -52,11 +52,11 @@ struct avx2_vector<int32_t> {
     static opmask_t get_partial_loadmask(uint64_t num_to_read)
     {
         auto mask = ((0x1ull << num_to_read) - 0x1ull);
-        return convert_int_to_avx2_mask(mask);
+        return convert_int_to_avx2_mask((int32_t)mask);
     }
     static opmask_t convert_int_to_mask(uint64_t intMask)
     {
-        return convert_int_to_avx2_mask(intMask);
+        return convert_int_to_avx2_mask((int32_t)intMask);
     }
     static ymmi_t
     seti(int v1, int v2, int v3, int v4, int v5, int v6, int v7, int v8)
@@ -225,11 +225,11 @@ struct avx2_vector<uint32_t> {
     static opmask_t get_partial_loadmask(uint64_t num_to_read)
     {
         auto mask = ((0x1ull << num_to_read) - 0x1ull);
-        return convert_int_to_avx2_mask(mask);
+        return convert_int_to_avx2_mask((int32_t)mask);
     }
     static opmask_t convert_int_to_mask(uint64_t intMask)
     {
-        return convert_int_to_avx2_mask(intMask);
+        return convert_int_to_avx2_mask((int32_t)intMask);
     }
     static ymmi_t
     seti(int v1, int v2, int v3, int v4, int v5, int v6, int v7, int v8)
@@ -405,11 +405,11 @@ struct avx2_vector<float> {
     static opmask_t get_partial_loadmask(uint64_t num_to_read)
     {
         auto mask = ((0x1ull << num_to_read) - 0x1ull);
-        return convert_int_to_avx2_mask(mask);
+        return convert_int_to_avx2_mask((int32_t)mask);
     }
     static opmask_t convert_int_to_mask(uint64_t intMask)
     {
-        return convert_int_to_avx2_mask(intMask);
+        return convert_int_to_avx2_mask((int32_t)intMask);
     }
     static int32_t convert_mask_to_int(opmask_t mask)
     {

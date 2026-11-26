@@ -60,7 +60,7 @@ struct compare_nan_end {
             bool b_nan = xss::fp::isnan(b);
             if (!a_nan && !b_nan) { return op(a, b); }
             if (a_nan && b_nan) { return false; }
-            return !a_nan; // b is NaN → a before b → NaN at end
+            return !a_nan; // b is NaN -> a before b -> NaN at end
         }
         else {
             return op(a, b);
@@ -82,7 +82,7 @@ struct compare_nan_begin {
             bool b_nan = xss::fp::isnan(b);
             if (!a_nan && !b_nan) { return op(a, b); }
             if (a_nan && b_nan) { return false; }
-            return a_nan; // a is NaN → a before b → NaN at beginning
+            return a_nan; // a is NaN -> a before b -> NaN at beginning
         }
         else {
             return op(a, b);
